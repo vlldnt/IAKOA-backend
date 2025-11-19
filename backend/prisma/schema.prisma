@@ -14,18 +14,78 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  name         String   @db.VarChar(30)
-  password     String
-  email        String   @unique
-  isCreator    Boolean  @default(false)
-  refreshToken String?  // Token de rafraîchissement hashé
-
-  companies    String[] // FK vers Company.id (liste)
-  favorites    String[] // FK vers Event.id (liste)
+  name            String         @db.VarChar(30)
+  password        String
+  email           String         @unique
+  isCreator       Boolean        @default(false)
+  refreshToken    String?
+  companies       Company[]
+  userFavorites   UserFavorite[]
 
   @@map("users")
+}
+
+model Company {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name           String  @db.VarChar(100)
+  description    String  @db.VarChar(300)
+  website        String?
+  socialNetworks Json?
+  ownerId        String
+  owner          User    @relation(fields: [ownerId], references: [id])
+  events         Event[]
+
+  @@map("companies")
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name          String         @db.VarChar(100)
+  date          DateTime
+  description   String         @db.VarChar(1000)
+  pricing       Int            @default(0)
+  location      Json
+  companyId     String
+  website       String?
+  company       Company        @relation(fields: [companyId], references: [id])
+  media         Media[]
+  userFavorites UserFavorite[]
+
+  @@map("events")
+}
+
+model Media {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  url     String
+  type    String
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("media")
+}
+
+model UserFavorite {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  userId  String
+  eventId String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@map("user_favorites")
 }

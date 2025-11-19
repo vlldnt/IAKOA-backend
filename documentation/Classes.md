@@ -31,9 +31,8 @@
 | `ownerId` | UUID | FK vers User.id |
 | `description` | String | Max 300 caractères |
 | `eventsList` | [UUID] | FK vers Event.id (liste) |
-| `socialNetworks` | Object | `{facebook?: String, instagram?: String, x?: String, youtube?: String, tiktok?: String}` |
+| `socials` | Object | `{facebook?: String, instagram?: String, x?: String, youtube?: String, tiktok?: String}` |
 | `website` | String | Regex: `^https?:\/\/.+` (URL valide) |
-
 ---
 
 ## Event (hérite de BaseEntity)
@@ -45,7 +44,7 @@
 | `date` | Date | Date de l'événement |
 | `pricing` | Int | Mini 0 and 0 ! gratuit|
 | `location` | Object | `{lat: Number, lon: Number}` Format géographique |
-| `companyCreatorId` | UUID | FK vers Company.id |
+| `owner_id` | UUID | FK vers Company.id |
 | `website` | String | Regex: `^https?:\/\/.+` (URL valide) |
 
 ---
@@ -55,7 +54,6 @@
 | Propriété | Type | Contraintes/Validations |
 |-----------|------|--------------------------|
 | `url` | String | URL de l'image/vidéo |
-| `type` | String | Enum: `image` ou `video` |
 | `eventId` | UUID | FK vers Event.id |
 
 
@@ -63,4 +61,5 @@
 ---
 Databse Dev:
 
-Connection à la db ```psql -U olos -d "IAKOA-backend" ```
+Connection à la db ```psql -U olos -d "IAKOA-backend" ``` wsl
+Connection à la db ```psql -U adrienv -d "IAKOA" ``` mac
