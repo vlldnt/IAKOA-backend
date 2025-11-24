@@ -28,3 +28,13 @@
 - Fix : conservation de `/auth/login`
 
 ---
+
+## 21/11/2025
+
+### Tâches accomplies
+- Conception du modèle `Company` dans `Classes.md` (héritage de `BaseEntity`)
+- Définition des propriétés de `Company` : `name`, `ownerId`, `description`, `eventsList`, `socials`, `website`
+- Définition des relations : `ownerId` comme FK vers `User.id`, `eventsList` comme liste de FK vers `Event.id`
+- Ajustement du modèle `User` pour lier les compagnies via la liste `companies` (FK vers `Company.id`)
+- Réflexion sur la scalabilité des relations (utilisation future de tables de liaison User-Company / User-Event)
+
