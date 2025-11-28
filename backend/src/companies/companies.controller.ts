@@ -24,18 +24,31 @@ export class CompaniesController {
     return this.companiesService.findAll();
   }
 
+  @Get('my-companies')
+  @UseGuards(JwtAuthGuard)
+  findAllByOwner(@GetUser() user: UserResponseDto) {
+    return this.companiesService.findAllByOwner(user.id);
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.companiesService.findOne(+id);
+  @UseGuards(JwtAuthGuard)
+  findOne(@Param('id') id: string, @GetUser() user: UserResponseDto) {
+    return this.companiesService.findOne(id, user.id, user.role);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto) {
-    return this.companiesService.update(+id, updateCompanyDto);
+  @UseGuards(JwtAuthGuard)
+  update(
+    @Param('id') id: string,
+    @Body() updateCompanyDto: UpdateCompanyDto,
+    @GetUser() user: UserResponseDto,
+  ) {
+    return this.companiesService.update(id, updateCompanyDto, user.id, user.role);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.companiesService.remove(+id);
+  @UseGuards(JwtAuthGuard)
+  remove(@Param('id') id: string, @GetUser() user: UserResponseDto) {
+    return this.companiesService.remove(id, user.id, user.role);
   }
 }

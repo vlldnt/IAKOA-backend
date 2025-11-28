@@ -51,7 +51,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException(`Utilisateur avec l'ID ${id} non trouvé`);
+      throw new NotFoundException(`Utilisateur avec l'ID ${id} non trouvé.`);
     }
 
     return this.toResponseDto(user);

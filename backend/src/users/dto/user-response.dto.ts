@@ -1,3 +1,5 @@
+import { Role } from '@prisma/client';
+
 // Réponse API utilisateur: format public des données.
 export class UserResponseDto {
   id: string;
@@ -5,5 +7,6 @@ export class UserResponseDto {
   updatedAt: Date;
   name: string;
   email: string;
+  role: Role;
   isCreator: boolean;
 }

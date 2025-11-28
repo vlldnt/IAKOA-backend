@@ -12,6 +12,11 @@ datasource db {
   relationMode = "foreignKeys"
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 model User {
   id        String   @id @default(uuid()) @db.Uuid
   createdAt DateTime @default(now()) @db.Timestamptz(3)
@@ -20,6 +25,7 @@ model User {
   name          String         @db.VarChar(30)
   password      String
   email         String         @unique
+  role          Role           @default(USER)
   isCreator     Boolean        @default(false)
   refreshToken  String?
   companies     Company[]
@@ -27,6 +33,7 @@ model User {
 
   @@index([email])
   @@index([isCreator])
+  @@index([role])
   @@map("users")
 }
 
