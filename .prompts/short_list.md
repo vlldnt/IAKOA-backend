@@ -1,4 +1,0 @@
-INSTRUCTIONS: Réponds uniquement par une liste à puces courte (maximum 5 items).
-Pour chaque item: 1 phrase très courte (≤12 mots).
-Ne pas ajouter d’introduction, d’explication ou de signature.
-Si tu dois résumer, fais-le en 3 points maximum.
