@@ -1,22 +1,21 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["typedSql", "nativeDistinct"]
+  engineType = "library"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  relationMode = "foreignKeys"
 }
 
 model User {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
   name          String         @db.VarChar(30)
   password      String
@@ -26,68 +25,80 @@ model User {
   companies     Company[]
   userFavorites UserFavorite[]
 
+  @@index([email])
+  @@index([isCreator])
   @@map("users")
 }
 
 model Company {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
   name           String  @db.VarChar(100)
   description    String? @db.VarChar(300)
   website        String?
-  socialNetworks Json?
+  socialNetworks Json?   @db.JsonB
   siren          String  @unique @db.Char(9)
   isValidated    Boolean @default(false)
-  ownerId        String
-  owner          User    @relation(fields: [ownerId], references: [id])
+  ownerId        String  @db.Uuid
+  owner          User    @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   events         Event[]
 
+  @@index([ownerId])
+  @@index([siren])
+  @@index([isValidated])
   @@map("companies")
 }
 
 model Event {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
   name          String         @db.VarChar(100)
-  date          DateTime
+  date          DateTime       @db.Timestamptz(3)
   description   String         @db.VarChar(1000)
   pricing       Int            @default(0)
-  location      Json
-  companyId     String
+  location      Json           @db.JsonB
+  companyId     String         @db.Uuid
   website       String?
-  company       Company        @relation(fields: [companyId], references: [id])
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   media         Media[]
   userFavorites UserFavorite[]
 
+  @@index([companyId])
+  @@index([date])
+  @@index([pricing])
   @@map("events")
 }
 
 model Media {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
   url     String
-  type    String
-  eventId String
-  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  type    String   @db.VarChar(50)
+  eventId String   @db.Uuid
+  event   Event    @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
+  @@index([eventId])
+  @@index([type])
   @@map("media")
 }
 
 model UserFavorite {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
 
-  userId  String
-  eventId String
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId  String @db.Uuid
+  eventId String @db.Uuid
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@unique([userId, eventId])
+  @@index([userId])
+  @@index([eventId])
   @@map("user_favorites")
 }
