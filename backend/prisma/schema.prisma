@@ -4,12 +4,10 @@
 generator client {
   provider = "prisma-client-js"
   previewFeatures = ["typedSql", "nativeDistinct"]
-  engineType = "library"
 }
 
 datasource db {
   provider = "postgresql"
-  relationMode = "foreignKeys"
 }
 
 enum Role {

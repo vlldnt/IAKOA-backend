@@ -1,5 +1,5 @@
 // Création utilisateur: valider nom, email, mot de passe.
-import { IsEmail, IsString, MaxLength, IsOptional, IsBoolean, Matches, IsUUID } from 'class-validator';
+import { IsEmail, IsString, MaxLength, IsOptional, IsBoolean, Matches } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
@@ -21,7 +21,4 @@ export class CreateUserDto {
   @IsOptional()
   @IsBoolean()
   isCreator?: boolean;
-
-  @IsUUID()
-  id: string;
 }
