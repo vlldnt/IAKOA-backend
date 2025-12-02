@@ -2,7 +2,6 @@
 
 ## 18/11/2025
 
-### Tâches accomplies
 - Création du projet IAKOA-backend
 - Mise en place d'un journal de bord
 - Début avec NestJS : installation du projet
@@ -14,7 +13,6 @@
 
 ## 19/11/2025
 
-### Tâches accomplies
 - Implémentation du module Events avec opérations CRUD
 - Mise à jour du schéma Prisma
 - Ajout du `HealthController` pour l’endpoint `/health`
@@ -31,10 +29,35 @@
 
 ## 21/11/2025
 
-### Tâches accomplies
 - Conception du modèle `Company` dans `Classes.md` (héritage de `BaseEntity`)
 - Définition des propriétés de `Company` : `name`, `ownerId`, `description`, `eventsList`, `socials`, `website`
 - Définition des relations : `ownerId` comme FK vers `User.id`, `eventsList` comme liste de FK vers `Event.id`
 - Ajustement du modèle `User` pour lier les compagnies via la liste `companies` (FK vers `Company.id`)
 - Réflexion sur la scalabilité des relations (utilisation future de tables de liaison User-Company / User-Event)
+
+---
+
+## 28/11/2025
+
+- Implémentation du module `Company` : contrôleur, service et repository avec opérations CRUD
+- Mise à jour du schéma Prisma : ajout du modèle `Company`, relations vers `User` et `Event` ; migration appliquée
+- Ajout des DTOs et validation (class-validator) pour les endpoints Company
+- Écriture de tests unitaires basiques pour Company (service + controller)
+- Exposition d'une route publique pour récupérer les événements d'une company
+- Optimisation des requêtes Prisma (utilisation de `include` pour réduire les appels)
+- Refactor : suppression des entités legacy et nettoyage de l'arborescence
+- Mise à jour de la documentation (Classes.md + journal) pour inclure Company
+- Corrections mineures : gestion des erreurs Prisma et normalisation du format des dates
+- Mise à jour des notes de déploiement et des variables d'environnement nécessaires pour la migration
+
+---
+
+## 02/12/2025
+
+- Configuration initiale de la base de données PostgreSQL
+- Création de l'utilisateur `iakoa_dev` et de la base de données `iakoa-backend` pour docker-mac
+- Génération du client Prisma TypeScript (v7.0.1)
+- Vérification de la structure complète de la base de données (6 tables : users, companies, events, media, user_favorites, _prisma_migrations)
+- Création du guide de lancement complet dans `Lancement.md`
+- Base de données maintenant fonctionnelle et synchronisée avec le schéma Prisma
 
