@@ -63,13 +63,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     // Logger uniquement les erreurs serveur (5xx)
     if (status >= 500) {
       this.logger.error(
-        `HTTP ${status} Error on ${request.method} ${request.url}`,
+        `Error: ${Array.isArray(message) ? message.join(', ') : message}`,
         exception instanceof Error ? exception.stack : exception,
-      );
-    } else {
-      // Logger les erreurs client (4xx) en niveau debug seulement
-      this.logger.debug(
-        `HTTP ${status} on ${request.method} ${request.url}: ${Array.isArray(message) ? message.join(', ') : message}`,
       );
     }
 
