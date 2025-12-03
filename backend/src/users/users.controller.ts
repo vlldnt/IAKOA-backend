@@ -1,9 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, ValidationPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, ValidationPipe, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @ApiTags('users')
 @Controller('users')
@@ -32,11 +36,16 @@ export class UsersController {
    * GET /users - Récupérer tous les utilisateurs
    */
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Récupérer tous les utilisateurs',
-    description: 'Retourne la liste de tous les utilisateurs enregistrés.',
+    description: 'Retourne la liste de tous les utilisateurs enregistrés. Réservé aux administrateurs.',
   })
   @ApiResponse({ status: 200, description: 'Liste des utilisateurs', type: [UserResponseDto] })
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiResponse({ status: 403, description: 'Accès refusé - réservé aux administrateurs' })
   findAll() {
     return this.usersService.findAll();
   }

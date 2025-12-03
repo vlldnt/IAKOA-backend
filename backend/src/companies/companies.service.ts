@@ -9,7 +9,14 @@ import { Role } from '@prisma/client';
 export class CompaniesService {
   constructor(private readonly prisma: PrismaService) { }
 
-  async create(createCompanyDto: CreateCompanyDto, userId: string): Promise<CompanyResponseDto> {
+  async create(createCompanyDto: CreateCompanyDto, userId: string, isCreator: boolean): Promise<CompanyResponseDto> {
+    // Vérifier que l'utilisateur est un créateur
+    if (!isCreator) {
+      throw new UnauthorizedException(
+        'Seuls les utilisateurs créateurs peuvent créer des entreprises. Contactez un administrateur pour obtenir ce statut.'
+      );
+    }
+
     try {
       const company = await this.prisma.company.create({
         data: {

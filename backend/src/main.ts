@@ -16,16 +16,16 @@ async function bootstrap() {
 
   // Activer la validation globale avec messages d'erreur personnalisés
   app.useGlobalPipes(new ValidationPipe({
-    whitelist: true, // Supprime les propriétés non définies dans le DTO
-    forbidNonWhitelisted: true, // Rejette les requêtes avec des propriétés non autorisées
-    transform: true, // Transforme automatiquement les types
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
     transformOptions: {
-      enableImplicitConversion: true, // Convertit automatiquement les types primitifs
+      enableImplicitConversion: true,
     },
-    disableErrorMessages: false, // Affiche les messages d'erreur
+    disableErrorMessages: false,
     validationError: {
-      target: false, // Ne pas exposer l'objet cible dans les erreurs
-      value: false, // Ne pas exposer les valeurs dans les erreurs
+      target: false,
+      value: false,
     },
   }));
 

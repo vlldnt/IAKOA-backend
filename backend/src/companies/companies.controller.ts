@@ -5,8 +5,11 @@ import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CompanyResponseDto } from './dto/company-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { UserResponseDto } from '../users/dto/user-response.dto';
+import { Role } from '@prisma/client';
 
 @ApiTags('companies')
 @Controller('companies')
@@ -18,25 +21,31 @@ export class CompaniesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Créer une nouvelle entreprise',
-    description: 'Crée une entreprise associée à l\'utilisateur connecté.',
+    description: 'Crée une entreprise associée à l\'utilisateur connecté. Réservé aux utilisateurs créateurs (isCreator = true).',
   })
   @ApiBody({ type: CreateCompanyDto })
   @ApiResponse({ status: 201, description: 'Entreprise créée avec succès', type: CompanyResponseDto })
   @ApiResponse({ status: 400, description: 'Données invalides' })
-  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiResponse({ status: 401, description: 'Non authentifié ou utilisateur non créateur' })
+  @ApiResponse({ status: 403, description: 'Accès refusé - seuls les créateurs peuvent créer des entreprises' })
   create(
     @Body() createCompanyDto: CreateCompanyDto,
     @GetUser() user: UserResponseDto,
   ) {
-    return this.companiesService.create(createCompanyDto, user.id);
+    return this.companiesService.create(createCompanyDto, user.id, user.isCreator);
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Récupérer toutes les entreprises',
-    description: 'Retourne la liste de toutes les entreprises.',
+    description: 'Retourne la liste de toutes les entreprises. Réservé aux administrateurs.',
   })
   @ApiResponse({ status: 200, description: 'Liste des entreprises', type: [CompanyResponseDto] })
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiResponse({ status: 403, description: 'Accès refusé - réservé aux administrateurs' })
   findAll() {
     return this.companiesService.findAll();
   }

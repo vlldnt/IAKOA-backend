@@ -6,6 +6,7 @@ import { HealthController } from './health.controller';
 import { CompaniesModule } from './companies/companies.module';
 import { EventsModule } from './events/events.module';
 import { MediaModule } from './media/media.module';
+import { UserFavoritesModule } from './user-favorites/user-favorites.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { MediaModule } from './media/media.module';
     CompaniesModule,
     EventsModule,
     MediaModule,
+    UserFavoritesModule,
   ],
   controllers: [HealthController],
 })
