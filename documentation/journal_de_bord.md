@@ -71,4 +71,7 @@
 - Mise à jour du schéma Prisma : migration pour augmenter la longueur du champ `description` de Event à 5000 caractères
 - Configuration des modules NestJS avec imports et exports nécessaires
 - Adding a planification for API tests `Test_routes.md`
+- Implémentation du module UserFavorites : CRUD complet avec 7 endpoints (ajout/suppression/consultation/comptage de favoris), DTOs validés, contrainte unique (userId + eventId)
+- Système de contrôle d'accès robuste : vérification isCreator pour création d'entreprises, validation de propriété (companies/events/media), guards RolesGuard avec messages d'erreur en français (403 Forbidden), endpoints admin-only (GET /users, GET /companies), et endpoints personnels (/my-companies, /my-events)
+- Endpoints publics pour consultation : GET /events, GET /events/:id et GET /media/:eventId accessibles sans authentification pour permettre la navigation publique des événements et médias sur le site/app mobile
 
