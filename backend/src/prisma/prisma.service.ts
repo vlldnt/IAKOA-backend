@@ -24,9 +24,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     super({
       adapter,
       log: [
-        { level: 'query', emit: 'event' },
         { level: 'error', emit: 'event' },
-        { level: 'info', emit: 'event' },
         { level: 'warn', emit: 'event' },
       ],
       errorFormat: 'pretty',
@@ -34,11 +32,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
     this.pool = pool;
 
-    // Log Prisma events
-    this.$on('query' as never, (e: any) => {
-      this.logger.debug(`Query: ${e.query} - Duration: ${e.duration}ms`);
-    });
-
+    // Log Prisma errors and warnings only
     this.$on('error' as never, (e: any) => {
       this.logger.error(`Prisma Error: ${e.message}`, e);
     });

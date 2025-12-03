@@ -10,11 +10,19 @@ async function bootstrap() {
   // Exception filter global pour logger les erreurs
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Activer la validation globale
+  // Activer la validation globale avec messages d'erreur personnalisés
   app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
+    whitelist: true, // Supprime les propriétés non définies dans le DTO
+    forbidNonWhitelisted: true, // Rejette les requêtes avec des propriétés non autorisées
+    transform: true, // Transforme automatiquement les types
+    transformOptions: {
+      enableImplicitConversion: true, // Convertit automatiquement les types primitifs
+    },
+    disableErrorMessages: false, // Affiche les messages d'erreur
+    validationError: {
+      target: false, // Ne pas exposer l'objet cible dans les erreurs
+      value: false, // Ne pas exposer les valeurs dans les erreurs
+    },
   }));
 
   // Activer CORS

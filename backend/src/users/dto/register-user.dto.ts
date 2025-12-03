@@ -1,9 +1,8 @@
-// Création utilisateur administrative: nom, email, mot de passe, isCreator (optionnel)
-// Pour l'inscription publique, utiliser RegisterUserDto
-import { IsEmail, IsString, MaxLength, IsOptional, IsBoolean, Matches } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+// DTO pour l'inscription publique: nom, email, mot de passe uniquement
+import { IsEmail, IsString, MaxLength, Matches } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateUserDto {
+export class RegisterUserDto {
   @ApiProperty({
     description: 'Nom de l\'utilisateur',
     example: 'Jean Dupont',
@@ -34,13 +33,4 @@ export class CreateUserDto {
       'Mot de passe: min 8, 1 majuscule, 1 chiffre, 1 spécial',
   })
   password: string;
-
-  @ApiPropertyOptional({
-    description: 'Indique si l\'utilisateur est un créateur de contenu (réservé aux administrateurs)',
-    example: false,
-    default: false,
-  })
-  @IsOptional()
-  @IsBoolean()
-  isCreator?: boolean;
 }

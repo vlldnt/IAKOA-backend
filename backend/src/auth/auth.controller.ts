@@ -1,7 +1,7 @@
 import { Controller, Post, Body, HttpCode, HttpStatus, ValidationPipe, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from '../users/dto/create-user.dto';
+import { RegisterUserDto } from '../users/dto/register-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -20,9 +20,9 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Inscription d\'un nouvel utilisateur',
-    description: 'Crée un nouveau compte utilisateur avec email et mot de passe. Retourne les tokens JWT.',
+    description: 'Crée un nouveau compte utilisateur avec email et mot de passe. Retourne les tokens JWT. Le rôle et le statut de créateur sont définis automatiquement.',
   })
-  @ApiBody({ type: CreateUserDto })
+  @ApiBody({ type: RegisterUserDto })
   @ApiResponse({
     status: 201,
     description: 'Utilisateur créé avec succès',
@@ -37,8 +37,8 @@ export class AuthController {
   })
   @ApiResponse({ status: 400, description: 'Données invalides' })
   @ApiResponse({ status: 409, description: 'Email déjà utilisé' })
-  register(@Body(ValidationPipe) createUserDto: CreateUserDto) {
-    return this.authService.register(createUserDto);
+  register(@Body(ValidationPipe) registerUserDto: RegisterUserDto) {
+    return this.authService.register(registerUserDto);
   }
 
   /**

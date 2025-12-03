@@ -3,7 +3,6 @@ import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CompanyResponseDto } from './dto/company-response.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { UserResponseDto } from 'src/users/dto';
 import { Role } from '@prisma/client';
 
 @Injectable()
@@ -11,19 +10,26 @@ export class CompaniesService {
   constructor(private readonly prisma: PrismaService) { }
 
   async create(createCompanyDto: CreateCompanyDto, userId: string): Promise<CompanyResponseDto> {
-    const company = await this.prisma.company.create({
-      data: {
-        name: createCompanyDto.name,
-        siren: createCompanyDto.siren,
-        description: createCompanyDto.description ?? undefined,
-        website: createCompanyDto.website ?? undefined,
-        socialNetworks: createCompanyDto.socialNetworks ? JSON.parse(JSON.stringify(createCompanyDto.socialNetworks)) : undefined,
-        isValidated: createCompanyDto.isValidated ?? false,
-        ownerId: userId,
-      },
-    });
+    try {
+      const company = await this.prisma.company.create({
+        data: {
+          name: createCompanyDto.name,
+          siren: createCompanyDto.siren,
+          description: createCompanyDto.description ?? undefined,
+          website: createCompanyDto.website ?? undefined,
+          socialNetworks: createCompanyDto.socialNetworks ? JSON.parse(JSON.stringify(createCompanyDto.socialNetworks)) : undefined,
+          isValidated: createCompanyDto.isValidated ?? false,
+          ownerId: userId,
+        },
+      });
 
-    return new CompanyResponseDto(company);
+      return new CompanyResponseDto(company);
+    } catch (error) {
+      if (error.code === 'P2002') {
+        throw new ConflictException(`Une entreprise avec le SIREN ${createCompanyDto.siren} existe déjà.`);
+      }
+      throw error;
+    }
   }
 
   async findAll(): Promise<CompanyResponseDto[]> {
@@ -70,19 +76,29 @@ export class CompaniesService {
       throw new UnauthorizedException(`Vous n'êtes pas autorisé à modifier cette entreprise.`);
     }
 
-    const updatedCompany = await this.prisma.company.update({
-      where: { id },
-      data: {
-        name: updateCompanyDto.name ?? undefined,
-        siren: updateCompanyDto.siren ?? undefined,
-        description: updateCompanyDto.description ?? undefined,
-        website: updateCompanyDto.website ?? undefined,
-        socialNetworks: updateCompanyDto.socialNetworks ? JSON.parse(JSON.stringify(updateCompanyDto.socialNetworks)) : undefined,
-        isValidated: updateCompanyDto.isValidated ?? undefined,
-      },
-    });
+    try {
+      const updatedCompany = await this.prisma.company.update({
+        where: { id },
+        data: {
+          name: updateCompanyDto.name ?? undefined,
+          siren: updateCompanyDto.siren ?? undefined,
+          description: updateCompanyDto.description ?? undefined,
+          website: updateCompanyDto.website ?? undefined,
+          socialNetworks: updateCompanyDto.socialNetworks ? JSON.parse(JSON.stringify(updateCompanyDto.socialNetworks)) : undefined,
+          isValidated: updateCompanyDto.isValidated ?? undefined,
+        },
+      });
 
-    return new CompanyResponseDto(updatedCompany);
+      return new CompanyResponseDto(updatedCompany);
+    } catch (error) {
+      if (error.code === 'P2002') {
+        throw new ConflictException(`Une entreprise avec le SIREN ${updateCompanyDto.siren} existe déjà.`);
+      }
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Entreprise avec l'ID ${id} non trouvée.`);
+      }
+      throw error;
+    }
   }
 
   async remove(id: string, userId: string, userRole: Role): Promise<{ message: string }> {
@@ -98,10 +114,17 @@ export class CompaniesService {
       throw new UnauthorizedException(`Vous n'êtes pas autorisé à supprimer cette entreprise.`);
     }
 
-    await this.prisma.company.delete({
-      where: { id },
-    });
+    try {
+      await this.prisma.company.delete({
+        where: { id },
+      });
 
-    return { message: `Entreprise ${company.name} supprimée avec succès.` };
+      return { message: `Entreprise ${company.name} supprimée avec succès.` };
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Entreprise avec l'ID ${id} non trouvée.`);
+      }
+      throw error;
+    }
   }
 }

@@ -25,16 +25,23 @@ export class UsersService {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
     // Créer l'utilisateur
-    const user = await this.prisma.user.create({
-      data: {
-        name: createUserDto.name,
-        email: createUserDto.email,
-        password: hashedPassword,
-        isCreator: createUserDto.isCreator || false,
-      },
-    });
+    try {
+      const user = await this.prisma.user.create({
+        data: {
+          name: createUserDto.name,
+          email: createUserDto.email,
+          password: hashedPassword,
+          isCreator: createUserDto.isCreator || false,
+        },
+      });
 
-    return this.toResponseDto(user);
+      return this.toResponseDto(user);
+    } catch (error) {
+      if (error.code === 'P2002') {
+        throw new ConflictException('Cet email est déjà utilisé');
+      }
+      throw error;
+    }
   }
 
   async findAll(): Promise<UserResponseDto[]> {
@@ -91,12 +98,22 @@ export class UsersService {
     }
 
     // Mettre à jour l'utilisateur
-    const user = await this.prisma.user.update({
-      where: { id },
-      data,
-    });
+    try {
+      const user = await this.prisma.user.update({
+        where: { id },
+        data,
+      });
 
-    return this.toResponseDto(user);
+      return this.toResponseDto(user);
+    } catch (error) {
+      if (error.code === 'P2002') {
+        throw new ConflictException('Cet email est déjà utilisé');
+      }
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Utilisateur avec l'ID ${id} non trouvé`);
+      }
+      throw error;
+    }
   }
 
   async remove(id: string): Promise<{ message: string }> {
@@ -108,11 +125,18 @@ export class UsersService {
       throw new NotFoundException(`Utilisateur avec l'ID ${id} non trouvé`);
     }
 
-    await this.prisma.user.delete({
-      where: { id },
-    });
+    try {
+      await this.prisma.user.delete({
+        where: { id },
+      });
 
-    return { message: `Utilisateur ${user.name} supprimé avec succès` };
+      return { message: `Utilisateur ${user.name} supprimé avec succès` };
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Utilisateur avec l'ID ${id} non trouvé`);
+      }
+      throw error;
+    }
   }
 
   async validateUser(loginUserDto: LoginUserDto): Promise<UserResponseDto> {

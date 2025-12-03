@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { LoginUserDto } from '../users/dto/login-user.dto';
-import { CreateUserDto } from '../users/dto/create-user.dto';
+import { RegisterUserDto } from '../users/dto/register-user.dto';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -14,8 +14,12 @@ export class AuthService {
     private prisma: PrismaService,
   ) {}
 
-  async register(createUserDto: CreateUserDto) {
-    const user = await this.usersService.create(createUserDto);
+  async register(registerUserDto: RegisterUserDto) {
+    // Créer l'utilisateur avec isCreator défini à false par défaut
+    const user = await this.usersService.create({
+      ...registerUserDto,
+      isCreator: false,
+    });
     const tokens = await this.generateTokens(user.id, user.email);
     await this.updateRefreshToken(user.id, tokens.refresh_token);
 
@@ -45,12 +49,19 @@ export class AuthService {
   }
 
   async logout(userId: string) {
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { refreshToken: null },
-    });
+    try {
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { refreshToken: null },
+      });
 
-    return { message: 'Déconnexion réussie' };
+      return { message: 'Déconnexion réussie' };
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new UnauthorizedException('Utilisateur non trouvé');
+      }
+      throw error;
+    }
   }
 
   private async generateTokens(userId: string, email: string) {
@@ -76,28 +87,42 @@ export class AuthService {
   private async updateRefreshToken(userId: string, refreshToken: string) {
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { refreshToken: hashedRefreshToken },
-    });
+    try {
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { refreshToken: hashedRefreshToken },
+      });
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new UnauthorizedException('Utilisateur non trouvé');
+      }
+      throw error;
+    }
   }
 
   async validateRefreshToken(userId: string, refreshToken: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
 
-    if (!user || !user.refreshToken) {
+      if (!user || !user.refreshToken) {
+        throw new UnauthorizedException('Accès refusé');
+      }
+
+      const refreshTokenMatches = await bcrypt.compare(refreshToken, user.refreshToken);
+
+      if (!refreshTokenMatches) {
+        throw new UnauthorizedException('Accès refusé');
+      }
+
+      return user;
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       throw new UnauthorizedException('Accès refusé');
     }
-
-    const refreshTokenMatches = await bcrypt.compare(refreshToken, user.refreshToken);
-
-    if (!refreshTokenMatches) {
-      throw new UnauthorizedException('Accès refusé');
-    }
-
-    return user;
   }
 
   async validateUserById(userId: string) {
