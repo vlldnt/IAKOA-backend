@@ -9,7 +9,7 @@ export class EventsController {
 
   @Post()
   create(@Body() createEventDto: CreateEventDto) {
-    return this.eventsService.create(createEventDto);
+    return this.eventsService.create(createEventDto, createEventDto.companyId);
   }
 
   @Get()
