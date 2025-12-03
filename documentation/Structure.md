@@ -60,15 +60,31 @@ backend/
 │   │       ├── user-response.dto.ts     # DTO de réponse (sans password)
 │   │       └── index.ts                 # Export des DTOs
 │   │
-│   └── companies/                 # Module Companies (CRUD)
-│       ├── companies.module.ts    # Configuration du module Companies
-│       ├── companies.controller.ts # Routes CRUD des compagnies
-│       ├── companies.service.ts   # Logique métier des compagnies
+│   ├── companies/                 # Module Companies (CRUD)
+│   │   ├── companies.module.ts    # Configuration du module Companies
+│   │   ├── companies.controller.ts # Routes CRUD des compagnies
+│   │   ├── companies.service.ts   # Logique métier des compagnies
+│   │   └── dto/
+│   │       ├── create-company.dto.ts        # DTO pour créer une compagnie
+│   │       ├── update-company.dto.ts        # DTO pour mettre à jour une compagnie
+│   │       ├── company-response.dto.ts      # DTO de réponse
+│   │       └── social-networks.dto.ts       # DTO pour les réseaux sociaux
+│   │
+│   ├── events/                    # Module Events (CRUD)
+│   │   ├── events.module.ts       # Configuration du module Events
+│   │   ├── events.controller.ts   # Routes CRUD des événements
+│   │   ├── events.service.ts      # Logique métier des événements
+│   │   └── dto/
+│   │       ├── create-event.dto.ts          # DTO pour créer un événement (avec médias optionnels)
+│   │       ├── update-event.dto.ts          # DTO pour mettre à jour un événement
+│   │       └── event-response.dto.ts        # DTO de réponse (avec médias inclus)
+│   │
+│   └── media/                     # Module Media
+│       ├── media.module.ts        # Configuration du module Media
+│       ├── media.service.ts       # Logique métier des médias
 │       └── dto/
-│           ├── create-company.dto.ts        # DTO pour créer une compagnie
-│           ├── update-company.dto.ts        # DTO pour mettre à jour une compagnie
-│           ├── company-response.dto.ts      # DTO de réponse
-│           └── social-networks.dto.ts       # DTO pour les réseaux sociaux
+│           ├── create-media.dto.ts          # DTO pour créer un média
+│           └── media-response.dto.ts        # DTO de réponse pour un média
 │
 ├── test/                          # Tests end-to-end
 │   └── ...
@@ -116,6 +132,13 @@ backend/
 - `DELETE /companies/:id` - Supprimer une compagnie
 - `GET /companies/:id/events` - Récupérer les événements d'une compagnie
 
+### Events CRUD (🔒 Protégé par JWT)
+- `POST /events` - Créer un événement (avec médias optionnels)
+- `GET /events` - Liste tous les événements
+- `GET /events/:id` - Récupérer un événement par ID (avec médias)
+- `PATCH /events/:id` - Mettre à jour un événement
+- `DELETE /events/:id` - Supprimer un événement
+
 ## Technologies utilisées
 
 - **NestJS** - Framework Node.js
@@ -126,5 +149,6 @@ backend/
 - **bcrypt** - Hashage des mots de passe
 - **class-validator** - Validation des DTOs
 - **class-transformer** - Transformation des objets
+- **Swagger/OpenAPI** - Documentation API interactive
 
-***Mis à jour le 02/12/2025***
+***Mis à jour le 03/12/2025***

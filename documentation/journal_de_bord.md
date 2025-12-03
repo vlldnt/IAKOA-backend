@@ -61,3 +61,14 @@
 - Création du guide de lancement complet dans `Lancement.md`
 - Base de données maintenant fonctionnelle et synchronisée avec le schéma Prisma
 
+---
+
+## 03/12/2025
+
+- Implémentation complète du module `Events` (controller, service, DTOs) avec opérations CRUD et documentation Swagger
+- Implémentation du module `Media` (service, DTOs) pour gérer les médias liés aux événements
+- Intégration Events-Media : support des médias optionnels lors de la création d'événements avec logique transactionnelle
+- Mise à jour du schéma Prisma : migration pour augmenter la longueur du champ `description` de Event à 5000 caractères
+- Configuration des modules NestJS avec imports et exports nécessaires
+
+
