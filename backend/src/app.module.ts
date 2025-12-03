@@ -4,6 +4,9 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { HealthController } from './health.controller';
 import { CompaniesModule } from './companies/companies.module';
+import { EventsResolver } from './events/events.resolver';
+import { EventsModule } from './events/events.module';
+import { MediaModule } from './media/media.module';
 
 @Module({
   imports: [
@@ -11,8 +14,10 @@ import { CompaniesModule } from './companies/companies.module';
     UsersModule,
     AuthModule,
     CompaniesModule,
+    EventsModule,
+    MediaModule,
   ],
   controllers: [HealthController],
-  providers: [],
+  providers: [EventsResolver],
 })
 export class AppModule {}

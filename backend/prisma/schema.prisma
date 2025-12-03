@@ -63,7 +63,7 @@ model Event {
 
   name          String         @db.VarChar(100)
   date          DateTime       @db.Timestamptz(3)
-  description   String         @db.VarChar(1000)
+  description   String         @db.VarChar(5000)
   pricing       Int            @default(0)
   location      Json           @db.JsonB
   companyId     String         @db.Uuid
