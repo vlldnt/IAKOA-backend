@@ -70,5 +70,5 @@
 - Intégration Events-Media : support des médias optionnels lors de la création d'événements avec logique transactionnelle
 - Mise à jour du schéma Prisma : migration pour augmenter la longueur du champ `description` de Event à 5000 caractères
 - Configuration des modules NestJS avec imports et exports nécessaires
-
+- Adding a planification for API tests `Test_routes.md`
 
