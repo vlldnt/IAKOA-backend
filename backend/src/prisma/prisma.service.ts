@@ -34,7 +34,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
     // Log Prisma errors and warnings only
     this.$on('error' as never, (e: any) => {
-      this.logger.error(`Prisma Error: ${e.message}`, e);
+      // Extraire un message d'erreur plus clair
+      const errorMessage = this.formatPrismaError(e);
+      this.logger.error(`Prisma Error: ${errorMessage}`);
     });
 
     this.$on('warn' as never, (e: any) => {
@@ -59,6 +61,39 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     await this.$disconnect();
     await this.pool.end();
     this.logger.log('Disconnected from database');
+  }
+
+  /**
+   * Formate les erreurs Prisma pour les rendre plus lisibles
+   */
+  private formatPrismaError(e: any): string {
+    const message = e.message || '';
+    const target = e.target || '';
+
+    // Extraire le message d'erreur principal sans les détails de code
+    if (message.includes('invalid input syntax for type uuid')) {
+      const match = message.match(/invalid input syntax for type uuid: "(.*?)"/);
+      const invalidValue = match ? match[1] : 'valeur invalide';
+      return `UUID invalide: "${invalidValue}" (table: ${target})`;
+    }
+
+    if (message.includes('No record was found for an update')) {
+      return `Enregistrement introuvable pour mise à jour (table: ${target})`;
+    }
+
+    if (message.includes('Unique constraint failed')) {
+      const match = message.match(/Unique constraint failed on the fields: \((.*?)\)/);
+      const fields = match ? match[1] : 'champ inconnu';
+      return `Contrainte d'unicité violée sur: ${fields}`;
+    }
+
+    if (message.includes('Foreign key constraint failed')) {
+      return `Contrainte de clé étrangère violée (table: ${target})`;
+    }
+
+    // Si aucun pattern ne correspond, retourner un message simplifié
+    const firstLine = message.split('\n')[0];
+    return firstLine.length > 100 ? firstLine.substring(0, 100) + '...' : firstLine;
   }
 }
     
