@@ -75,3 +75,10 @@
 - Système de contrôle d'accès robuste : vérification isCreator pour création d'entreprises, validation de propriété (companies/events/media), guards RolesGuard avec messages d'erreur en français (403 Forbidden), endpoints admin-only (GET /users, GET /companies), et endpoints personnels (/my-companies, /my-events)
 - Endpoints publics pour consultation : GET /events, GET /events/:id et GET /media/:eventId accessibles sans authentification pour permettre la navigation publique des événements et médias sur le site/app mobile
 
+---
+
+## 04/12/2025
+
+- Configuration Jest pour tests unitaires avec base de données de test séparée (iakoa-tests)
+- Implémentation complète des tests d'authentification : 34 tests (service + controller) couvrant register, login, refresh token, validation des DTOs, gestion des erreurs
+
