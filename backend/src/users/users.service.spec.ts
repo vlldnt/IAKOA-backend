@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ConflictException } from '@nestjs/common/exceptions/conflict.exception';
 import { validate } from 'class-validator';
 import { CreateUserDto } from './dto/create-user.dto';
+import { Role } from '@prisma/client';
 
 describe('UsersService', () => {
   let usersService: UsersService;
@@ -314,7 +315,7 @@ describe('UsersService', () => {
 
     // Cas valides
     it('devrait mettre à jour le nom uniquement', async () => {
-      const updated = await usersService.update(userId, { name: 'New Name' });
+      const updated = await usersService.update(userId, { name: 'New Name' }, Role.USER);
 
       expect(updated.name).toBe('New Name');
       expect(updated.email).toBe(testUser.email);
@@ -322,7 +323,7 @@ describe('UsersService', () => {
     });
 
     it("devrait mettre à jour l'email uniquement", async () => {
-      const updated = await usersService.update(userId, { email: 'new@example.com' });
+      const updated = await usersService.update(userId, { email: 'new@example.com' }, Role.USER);
 
       expect(updated.email).toBe('new@example.com');
       expect(updated.name).toBe(testUser.name);
@@ -332,14 +333,14 @@ describe('UsersService', () => {
       const updated = await usersService.update(userId, {
         name: 'Updated Name',
         email: 'updated@example.com',
-      });
+      }, Role.USER);
 
       expect(updated.name).toBe('Updated Name');
       expect(updated.email).toBe('updated@example.com');
     });
 
     it('devrait hasher le nouveau mot de passe', async () => {
-      await usersService.update(userId, { password: 'NewPass123!' });
+      await usersService.update(userId, { password: 'NewPass123!' }, Role.USER);
 
       const userInDb = await prismaService.user.findUnique({ where: { id: userId } });
       expect(userInDb?.password).not.toBe('NewPass123!');
@@ -347,7 +348,7 @@ describe('UsersService', () => {
     });
 
     it('ne devrait pas exposer le mot de passe dans la réponse', async () => {
-      const updated = await usersService.update(userId, { name: 'Test' });
+      const updated = await usersService.update(userId, { name: 'Test' }, Role.USER);
 
       expect(updated).not.toHaveProperty('password');
       expect(updated).not.toHaveProperty('refreshToken');
@@ -357,7 +358,7 @@ describe('UsersService', () => {
       const originalUser = await usersService.findOne(userId);
       await new Promise(resolve => setTimeout(resolve, 10));
 
-      const updated = await usersService.update(userId, { name: 'Changed' });
+      const updated = await usersService.update(userId, { name: 'Changed' }, Role.USER);
 
       expect(updated.updatedAt.getTime()).toBeGreaterThan(originalUser.updatedAt.getTime());
     });
@@ -366,7 +367,7 @@ describe('UsersService', () => {
     it('devrait lancer NotFoundException si ID inexistant', async () => {
       const fakeId = '00000000-0000-0000-0000-000000000000';
 
-      await expect(usersService.update(fakeId, { name: 'Test' })).rejects.toThrow(
+      await expect(usersService.update(fakeId, { name: 'Test' }, Role.USER)).rejects.toThrow(
         `Utilisateur avec l'ID ${fakeId} non trouvé`,
       );
     });
@@ -374,19 +375,46 @@ describe('UsersService', () => {
     it('devrait lancer ConflictException si email déjà utilisé', async () => {
       await usersService.create({ ...testUser, email: 'other@example.com' });
 
-      await expect(usersService.update(userId, { email: 'other@example.com' })).rejects.toThrow(
+      await expect(usersService.update(userId, { email: 'other@example.com' }, Role.USER)).rejects.toThrow(
         ConflictException,
       );
     });
 
     it('devrait permettre de garder le même email', async () => {
-      const updated = await usersService.update(userId, { email: testUser.email });
+      const updated = await usersService.update(userId, { email: testUser.email }, Role.USER);
 
       expect(updated.email).toBe(testUser.email);
     });
 
     it("devrait lancer une erreur si l'ID est invalide", async () => {
-      await expect(usersService.update('', { name: 'Test' })).rejects.toThrow();
+      await expect(usersService.update('', { name: 'Test' }, Role.USER)).rejects.toThrow();
+    });
+
+    // Nouveaux tests pour les permissions
+    it('devrait empêcher un USER de modifier son rôle', async () => {
+      const updated = await usersService.update(userId, { name: 'Test', role: Role.ADMIN }, Role.USER);
+
+      expect(updated.role).toBe(Role.USER); // Le rôle ne doit pas changer
+      expect(updated.name).toBe('Test'); // Mais le nom doit changer
+    });
+
+    it('devrait empêcher un USER de modifier isCreator', async () => {
+      const updated = await usersService.update(userId, { name: 'Test', isCreator: true }, Role.USER);
+
+      expect(updated.isCreator).toBe(false); // isCreator ne doit pas changer
+      expect(updated.name).toBe('Test'); // Mais le nom doit changer
+    });
+
+    it('devrait permettre à un ADMIN de modifier le rôle', async () => {
+      const updated = await usersService.update(userId, { role: Role.ADMIN }, Role.ADMIN);
+
+      expect(updated.role).toBe(Role.ADMIN);
+    });
+
+    it('devrait permettre à un ADMIN de modifier isCreator', async () => {
+      const updated = await usersService.update(userId, { isCreator: true }, Role.ADMIN);
+
+      expect(updated.isCreator).toBe(true);
     });
   });
 

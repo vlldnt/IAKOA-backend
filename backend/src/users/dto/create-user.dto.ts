@@ -1,7 +1,8 @@
-// Création utilisateur administrative: nom, email, mot de passe, isCreator (optionnel)
+// Création utilisateur administrative: nom, email, mot de passe, isCreator (optionnel), role (optionnel)
 // Pour l'inscription publique, utiliser RegisterUserDto
-import { IsEmail, IsString, MaxLength, IsOptional, IsBoolean, Matches } from 'class-validator';
+import { IsEmail, IsString, MaxLength, IsOptional, IsBoolean, Matches, IsEnum } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Role } from '@prisma/client';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -45,4 +46,15 @@ export class CreateUserDto {
   @IsOptional()
   @IsBoolean()
   isCreator?: boolean;
+
+  @ApiPropertyOptional({
+    description:
+      "Rôle de l'utilisateur (réservé aux administrateurs)",
+    example: 'USER',
+    enum: Role,
+    default: 'USER',
+  })
+  @IsOptional()
+  @IsEnum(Role, { message: 'Le rôle doit être USER ou ADMIN' })
+  role?: Role;
 }

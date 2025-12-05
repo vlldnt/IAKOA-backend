@@ -8,11 +8,19 @@ import {
   HttpCode,
   HttpStatus,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { UserFavoritesService } from './user-favorites.service';
 import { CreateUserFavoriteDto } from './dto/create-user-favorite.dto';
 import { UserFavoriteResponseDto } from './dto/user-favorite-response.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OwnerGuard } from '../auth/guards/owner.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { GetUser } from '../auth/decorators/get-user.decorator';
+import { UserResponseDto } from '../users/dto/user-response.dto';
+import { Role } from '@prisma/client';
 
 @ApiTags('user-favorites')
 @Controller('user-favorites')
@@ -23,6 +31,8 @@ export class UserFavoritesController {
    * POST /user-favorites - Ajouter un événement aux favoris
    */
   @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Ajouter un événement aux favoris',
@@ -39,6 +49,10 @@ export class UserFavoritesController {
     description: 'Données invalides',
   })
   @ApiResponse({
+    status: 401,
+    description: 'Non authentifié',
+  })
+  @ApiResponse({
     status: 404,
     description: 'Utilisateur ou événement non trouvé',
   })
@@ -46,17 +60,19 @@ export class UserFavoritesController {
     status: 409,
     description: "L'événement est déjà dans les favoris",
   })
-  create(@Body(ValidationPipe) createUserFavoriteDto: CreateUserFavoriteDto) {
-    return this.userFavoritesService.create(createUserFavoriteDto);
+  create(@Body(ValidationPipe) createUserFavoriteDto: CreateUserFavoriteDto, @GetUser() user: UserResponseDto) {
+    return this.userFavoritesService.create(createUserFavoriteDto, user.id);
   }
 
   /**
    * GET /user-favorites/user/:userId - Obtenir tous les favoris d'un utilisateur
    */
   @Get('user/:userId')
+  @UseGuards(JwtAuthGuard, OwnerGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: "Obtenir tous les favoris d'un utilisateur",
-    description: "Retourne la liste de tous les événements favoris d'un utilisateur.",
+    description: "Retourne la liste de tous les événements favoris d'un utilisateur. Vous ne pouvez consulter que vos propres favoris (sauf ADMIN).",
   })
   @ApiParam({
     name: 'userId',
@@ -69,6 +85,14 @@ export class UserFavoritesController {
     type: [UserFavoriteResponseDto],
   })
   @ApiResponse({
+    status: 401,
+    description: 'Non authentifié',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Accès refusé - vous ne pouvez consulter que vos propres favoris',
+  })
+  @ApiResponse({
     status: 404,
     description: 'Utilisateur non trouvé',
   })
@@ -77,13 +101,16 @@ export class UserFavoritesController {
   }
 
   /**
-   * GET /user-favorites/event/:eventId - Obtenir tous les utilisateurs ayant mis un événement en favori
+   * GET /user-favorites/event/:eventId - Obtenir tous les utilisateurs ayant mis un événement en favori (ADMIN uniquement)
    */
   @Get('event/:eventId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtenir les utilisateurs ayant mis un événement en favori',
     description:
-      'Retourne la liste de tous les utilisateurs qui ont ajouté un événement à leurs favoris.',
+      'Retourne la liste de tous les utilisateurs qui ont ajouté un événement à leurs favoris. Réservé aux administrateurs.',
   })
   @ApiParam({
     name: 'eventId',
@@ -94,6 +121,14 @@ export class UserFavoritesController {
     status: 200,
     description: "Liste des utilisateurs ayant mis l'événement en favori",
     type: [UserFavoriteResponseDto],
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Non authentifié',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Accès refusé - réservé aux administrateurs',
   })
   @ApiResponse({
     status: 404,
@@ -107,9 +142,11 @@ export class UserFavoritesController {
    * GET /user-favorites/check/:userId/:eventId - Vérifier si un événement est en favori
    */
   @Get('check/:userId/:eventId')
+  @UseGuards(JwtAuthGuard, OwnerGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Vérifier si un événement est dans les favoris',
-    description: 'Vérifie si un utilisateur a ajouté un événement spécifique à ses favoris.',
+    description: 'Vérifie si un utilisateur a ajouté un événement spécifique à ses favoris. Vous ne pouvez vérifier que vos propres favoris (sauf ADMIN).',
   })
   @ApiParam({
     name: 'userId',
@@ -130,6 +167,14 @@ export class UserFavoritesController {
         isFavorite: { type: 'boolean', example: true },
       },
     },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Non authentifié',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Accès refusé - vous ne pouvez vérifier que vos propres favoris',
   })
   async isFavorite(@Param('userId') userId: string, @Param('eventId') eventId: string) {
     const isFavorite = await this.userFavoritesService.isFavorite(userId, eventId);
@@ -168,10 +213,12 @@ export class UserFavoritesController {
    * DELETE /user-favorites/:userId/:eventId - Retirer un événement des favoris
    */
   @Delete(':userId/:eventId')
+  @UseGuards(JwtAuthGuard, OwnerGuard)
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Retirer un événement des favoris',
-    description: 'Permet à un utilisateur de retirer un événement de sa liste de favoris.',
+    description: 'Permet à un utilisateur de retirer un événement de sa liste de favoris. Vous ne pouvez supprimer que vos propres favoris (sauf ADMIN).',
   })
   @ApiParam({
     name: 'userId',
@@ -194,6 +241,14 @@ export class UserFavoritesController {
     },
   })
   @ApiResponse({
+    status: 401,
+    description: 'Non authentifié',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Accès refusé - vous ne pouvez supprimer que vos propres favoris',
+  })
+  @ApiResponse({
     status: 404,
     description: 'Favori non trouvé',
   })
@@ -205,10 +260,12 @@ export class UserFavoritesController {
    * DELETE /user-favorites/user/:userId/all - Supprimer tous les favoris d'un utilisateur
    */
   @Delete('user/:userId/all')
+  @UseGuards(JwtAuthGuard, OwnerGuard)
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Supprimer tous les favoris d'un utilisateur",
-    description: "Supprime tous les événements favoris d'un utilisateur.",
+    description: "Supprime tous les événements favoris d'un utilisateur. Vous ne pouvez supprimer que vos propres favoris (sauf ADMIN).",
   })
   @ApiParam({
     name: 'userId',
@@ -228,6 +285,14 @@ export class UserFavoritesController {
         count: { type: 'number', example: 5 },
       },
     },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Non authentifié',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Accès refusé - vous ne pouvez supprimer que vos propres favoris',
   })
   removeAllByUserId(@Param('userId') userId: string) {
     return this.userFavoritesService.removeAllByUserId(userId);

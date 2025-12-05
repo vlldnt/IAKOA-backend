@@ -4,7 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User, Prisma } from '@prisma/client';
+import { User, Prisma, Role } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -75,7 +75,7 @@ export class UsersService {
     });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
+  async update(id: string, updateUserDto: UpdateUserDto, userRole?: Role): Promise<UserResponseDto> {
     // Vérifier si l'utilisateur existe
     const existingUser = await this.prisma.user.findUnique({
       where: { id },
@@ -96,8 +96,14 @@ export class UsersService {
       }
     }
 
-    // Hasher le nouveau mot de passe si fourni
+    // Empêcher un utilisateur non-admin de modifier son rôle ou isCreator
     const data: any = { ...updateUserDto };
+    if (userRole !== Role.ADMIN) {
+      delete data.role;
+      delete data.isCreator;
+    }
+
+    // Hasher le nouveau mot de passe si fourni
     if (updateUserDto.password) {
       data.password = await bcrypt.hash(updateUserDto.password, 10);
     }

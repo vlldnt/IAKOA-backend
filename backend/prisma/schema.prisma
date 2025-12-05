@@ -107,3 +107,4 @@ model UserFavorite {
   @@index([eventId])
   @@map("user_favorites")
 }
+ 

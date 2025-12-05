@@ -4,6 +4,7 @@ import {
   NotFoundException,
   InternalServerErrorException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserFavoriteDto } from './dto/create-user-favorite.dto';
@@ -16,8 +17,13 @@ export class UserFavoritesService {
   /**
    * Ajouter un événement aux favoris d'un utilisateur
    */
-  async create(createUserFavoriteDto: CreateUserFavoriteDto): Promise<UserFavoriteResponseDto> {
+  async create(createUserFavoriteDto: CreateUserFavoriteDto, authenticatedUserId: string): Promise<UserFavoriteResponseDto> {
     try {
+      // Vérifier que l'utilisateur ne peut ajouter des favoris que pour lui-même
+      if (createUserFavoriteDto.userId !== authenticatedUserId) {
+        throw new ForbiddenException('Vous ne pouvez ajouter des favoris que pour votre propre compte');
+      }
+
       // Vérifier que l'utilisateur existe
       const userExists = await this.prisma.user.findUnique({
         where: { id: createUserFavoriteDto.userId },
@@ -61,7 +67,7 @@ export class UserFavoritesService {
 
       return new UserFavoriteResponseDto(favorite);
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
         throw error;
       }
       if (error.code === 'P2002') {
