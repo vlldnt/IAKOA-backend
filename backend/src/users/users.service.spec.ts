@@ -276,7 +276,6 @@ describe('UsersService', () => {
 
       const users = await usersService.findAll();
 
-      // Le plus récent (user3) doit être en premier
       expect(users[0].id).toBe(user3.id);
       expect(users[1].id).toBe(user2.id);
       expect(users[2].id).toBe(user1.id);
@@ -301,6 +300,119 @@ describe('UsersService', () => {
       );
       await expect(usersService.findOne('')).rejects.toThrow(
         'invalid input syntax for type uuid: ""',
+      );
+    });
+  });
+
+  describe('update', () => {
+    let userId: string;
+
+    beforeEach(async () => {
+      const user = await usersService.create(testUser);
+      userId = user.id;
+    });
+
+    // Cas valides
+    it('devrait mettre à jour le nom uniquement', async () => {
+      const updated = await usersService.update(userId, { name: 'New Name' });
+
+      expect(updated.name).toBe('New Name');
+      expect(updated.email).toBe(testUser.email);
+      expect(updated.id).toBe(userId);
+    });
+
+    it("devrait mettre à jour l'email uniquement", async () => {
+      const updated = await usersService.update(userId, { email: 'new@example.com' });
+
+      expect(updated.email).toBe('new@example.com');
+      expect(updated.name).toBe(testUser.name);
+    });
+
+    it('devrait mettre à jour plusieurs champs en même temps', async () => {
+      const updated = await usersService.update(userId, {
+        name: 'Updated Name',
+        email: 'updated@example.com',
+      });
+
+      expect(updated.name).toBe('Updated Name');
+      expect(updated.email).toBe('updated@example.com');
+    });
+
+    it('devrait hasher le nouveau mot de passe', async () => {
+      await usersService.update(userId, { password: 'NewPass123!' });
+
+      const userInDb = await prismaService.user.findUnique({ where: { id: userId } });
+      expect(userInDb?.password).not.toBe('NewPass123!');
+      expect(userInDb?.password).toMatch(/^\$2[aby]\$.{56}$/);
+    });
+
+    it('ne devrait pas exposer le mot de passe dans la réponse', async () => {
+      const updated = await usersService.update(userId, { name: 'Test' });
+
+      expect(updated).not.toHaveProperty('password');
+      expect(updated).not.toHaveProperty('refreshToken');
+    });
+
+    it('devrait mettre à jour updatedAt', async () => {
+      const originalUser = await usersService.findOne(userId);
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      const updated = await usersService.update(userId, { name: 'Changed' });
+
+      expect(updated.updatedAt.getTime()).toBeGreaterThan(originalUser.updatedAt.getTime());
+    });
+
+    // Cas d'erreur
+    it('devrait lancer NotFoundException si ID inexistant', async () => {
+      const fakeId = '00000000-0000-0000-0000-000000000000';
+
+      await expect(usersService.update(fakeId, { name: 'Test' })).rejects.toThrow(
+        `Utilisateur avec l'ID ${fakeId} non trouvé`,
+      );
+    });
+
+    it('devrait lancer ConflictException si email déjà utilisé', async () => {
+      await usersService.create({ ...testUser, email: 'other@example.com' });
+
+      await expect(usersService.update(userId, { email: 'other@example.com' })).rejects.toThrow(
+        ConflictException,
+      );
+    });
+
+    it('devrait permettre de garder le même email', async () => {
+      const updated = await usersService.update(userId, { email: testUser.email });
+
+      expect(updated.email).toBe(testUser.email);
+    });
+
+    it("devrait lancer une erreur si l'ID est invalide", async () => {
+      await expect(usersService.update('', { name: 'Test' })).rejects.toThrow();
+    });
+  });
+
+  describe('Delete tests', () => {
+    let userId: string;
+
+    beforeEach(async () => {
+      const user = await usersService.create(testUser);
+      userId = user.id;
+    });
+
+    it('devrait supprimer un utilisateur existant', async () => {
+      const response = await usersService.remove(userId);
+
+      expect(response).toEqual({ message: `Utilisateur ${testUser.name} supprimé avec succès` });
+
+      await expect(usersService.findOne(userId)).rejects.toThrow(
+        `Utilisateur avec l'ID ${userId} non trouvé.`,
+      );
+    });
+
+    it("devrait lancer NotFoundException si l'utilisateur n'existe pas", async () => {
+      const fakeId = '00000000-0000-0000-0000-000000000000';
+
+      await expect(usersService.remove(fakeId)).rejects.toThrow(
+        `Utilisateur avec l'ID ${fakeId} non trouvé`,
       );
     });
   });
