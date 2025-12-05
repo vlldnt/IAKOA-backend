@@ -8,7 +8,8 @@ module.exports = {
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: '../coverage',
   testEnvironment: 'node',
-  maxWorkers: 1, // Exécuter les tests séquentiellement
-  forceExit: true, // Forcer la sortie après les tests
-  detectOpenHandles: true, // Détecter les handles ouverts
+  maxWorkers: 1,
+  forceExit: true,
+  detectOpenHandles: true,
+  verbose: false,
 };

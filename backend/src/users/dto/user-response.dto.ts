@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 // Réponse API utilisateur: format public des données.
 export class UserResponseDto {
   @ApiProperty({
-    description: 'Identifiant unique de l\'utilisateur',
+    description: "Identifiant unique de l'utilisateur",
     example: 'cm2xxxxxxxxxxxx',
   })
   id: string;
@@ -22,26 +22,26 @@ export class UserResponseDto {
   updatedAt: Date;
 
   @ApiProperty({
-    description: 'Nom de l\'utilisateur',
+    description: "Nom de l'utilisateur",
     example: 'Jean Dupont',
   })
   name: string;
 
   @ApiProperty({
-    description: 'Adresse email de l\'utilisateur',
+    description: "Adresse email de l'utilisateur",
     example: 'jean.dupont@example.com',
   })
   email: string;
 
   @ApiProperty({
-    description: 'Rôle de l\'utilisateur dans le système',
+    description: "Rôle de l'utilisateur dans le système",
     example: 'USER',
     enum: Role,
   })
   role: Role;
 
   @ApiProperty({
-    description: 'Indique si l\'utilisateur est un créateur de contenu',
+    description: "Indique si l'utilisateur est un créateur de contenu",
     example: false,
   })
   isCreator: boolean;

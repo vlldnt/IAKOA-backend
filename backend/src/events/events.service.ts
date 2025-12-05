@@ -3,7 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  ForbiddenException
+  ForbiddenException,
 } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -17,9 +17,13 @@ export class EventsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mediaService: MediaService,
-  ) { }
+  ) {}
 
-  async create(createEventDto: CreateEventDto, companyId: string, userId: string): Promise<EventResponseDto> {
+  async create(
+    createEventDto: CreateEventDto,
+    companyId: string,
+    userId: string,
+  ): Promise<EventResponseDto> {
     // Vérifier que la company existe et que l'utilisateur en est le propriétaire
     const company = await this.prisma.company.findUnique({
       where: { id: companyId },
@@ -31,7 +35,7 @@ export class EventsService {
 
     if (company.ownerId !== userId) {
       throw new ForbiddenException(
-        'Vous ne pouvez créer un événement que pour une entreprise dont vous êtes propriétaire.'
+        'Vous ne pouvez créer un événement que pour une entreprise dont vous êtes propriétaire.',
       );
     }
 
@@ -43,7 +47,9 @@ export class EventsService {
           date: createEventDto.date,
           description: createEventDto.description,
           pricing: createEventDto.pricing,
-          location: createEventDto.location ? JSON.parse(JSON.stringify(createEventDto.location)) : undefined,
+          location: createEventDto.location
+            ? JSON.parse(JSON.stringify(createEventDto.location))
+            : undefined,
           companyId: companyId,
           website: createEventDto.website,
         },
@@ -65,7 +71,6 @@ export class EventsService {
       }
 
       return new EventResponseDto(eventWithMedia);
-
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof ForbiddenException) {
         throw error;
@@ -73,7 +78,7 @@ export class EventsService {
       if (error.code === 'P2002') {
         throw new ConflictException(`Un événement avec ce nom ${createEventDto.name} existe déjà.`);
       }
-      throw new InternalServerErrorException('Erreur lors de la création de l\'événement.');
+      throw new InternalServerErrorException("Erreur lors de la création de l'événement.");
     }
   }
 
@@ -129,13 +134,18 @@ export class EventsService {
 
     // Vérifier que l'utilisateur est propriétaire de la company (sauf admin)
     if (userRole !== Role.ADMIN && event.company.ownerId !== userId) {
-      throw new ForbiddenException('Vous n\'avez pas accès à cet événement.');
+      throw new ForbiddenException("Vous n'avez pas accès à cet événement.");
     }
 
     return new EventResponseDto(event);
   }
 
-  async update(id: string, updateEventDto: UpdateEventDto, userId: string, userRole: Role): Promise<EventResponseDto> {
+  async update(
+    id: string,
+    updateEventDto: UpdateEventDto,
+    userId: string,
+    userRole: Role,
+  ): Promise<EventResponseDto> {
     const event = await this.prisma.event.findUnique({
       where: { id },
       include: { company: true },
@@ -147,7 +157,7 @@ export class EventsService {
 
     // Vérifier que l'utilisateur est propriétaire de la company (sauf admin)
     if (userRole !== Role.ADMIN && event.company.ownerId !== userId) {
-      throw new ForbiddenException('Vous n\'êtes pas autorisé à modifier cet événement.');
+      throw new ForbiddenException("Vous n'êtes pas autorisé à modifier cet événement.");
     }
 
     try {
@@ -158,7 +168,9 @@ export class EventsService {
           date: updateEventDto.date ?? undefined,
           description: updateEventDto.description ?? undefined,
           pricing: updateEventDto.pricing ?? undefined,
-          location: updateEventDto.location ? JSON.parse(JSON.stringify(updateEventDto.location)) : undefined,
+          location: updateEventDto.location
+            ? JSON.parse(JSON.stringify(updateEventDto.location))
+            : undefined,
           website: updateEventDto.website ?? undefined,
         },
         include: { media: true },
@@ -172,7 +184,7 @@ export class EventsService {
       if (error.code === 'P2025') {
         throw new NotFoundException(`Événement avec l'ID ${id} non trouvé.`);
       }
-      throw new InternalServerErrorException('Erreur lors de la mise à jour de l\'événement.');
+      throw new InternalServerErrorException("Erreur lors de la mise à jour de l'événement.");
     }
   }
 
@@ -188,7 +200,7 @@ export class EventsService {
 
     // Vérifier que l'utilisateur est propriétaire de la company (sauf admin)
     if (userRole !== Role.ADMIN && event.company.ownerId !== userId) {
-      throw new ForbiddenException('Vous n\'êtes pas autorisé à supprimer cet événement.');
+      throw new ForbiddenException("Vous n'êtes pas autorisé à supprimer cet événement.");
     }
 
     try {
@@ -201,7 +213,7 @@ export class EventsService {
       if (error.code === 'P2025') {
         throw new NotFoundException(`Événement avec l'ID ${id} non trouvé.`);
       }
-      throw new InternalServerErrorException('Erreur lors de la suppression de l\'événement.');
+      throw new InternalServerErrorException("Erreur lors de la suppression de l'événement.");
     }
   }
 }

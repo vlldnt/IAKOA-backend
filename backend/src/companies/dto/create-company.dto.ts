@@ -1,13 +1,21 @@
 // Création entreprise: nom, description, site, réseaux sociaux.
-import { IsString, MaxLength, IsBoolean, IsOptional, IsUrl, ValidateNested, Matches } from "class-validator";
-import { Type } from "class-transformer";
-import { ApiProperty } from "@nestjs/swagger";
-import { SocialNetworksDto } from "./social-networks.dto";
+import {
+  IsString,
+  MaxLength,
+  IsBoolean,
+  IsOptional,
+  IsUrl,
+  ValidateNested,
+  Matches,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
+import { SocialNetworksDto } from './social-networks.dto';
 
 export class CreateCompanyDto {
   @ApiProperty({
     description: "Nom de l'entreprise",
-    example: "Entreprise SARL",
+    example: 'Entreprise SARL',
     maxLength: 100,
   })
   @IsString()
@@ -16,21 +24,21 @@ export class CreateCompanyDto {
 
   @ApiProperty({
     description: "Numéro SIREN de l'entreprise (9 chiffres)",
-    example: "123456789",
-    pattern: "^\\d{9}$",
+    example: '123456789',
+    pattern: '^\\d{9}$',
   })
   @IsString()
-  @Matches(/^\d{9}$/, { message: "Le SIREN doit contenir exactement 9 chiffres" })
+  @Matches(/^\d{9}$/, { message: 'Le SIREN doit contenir exactement 9 chiffres' })
   siren: string;
 
   @ApiProperty({
     description: "Description de l'entreprise",
-    example: "Une entreprise spécialisée dans...",
+    example: 'Une entreprise spécialisée dans...',
     maxLength: 300,
     required: false,
   })
   @IsString()
-  @MaxLength(300, { message: "La description ne peut pas dépasser 300 caractères" })
+  @MaxLength(300, { message: 'La description ne peut pas dépasser 300 caractères' })
   description?: string;
 
   @ApiProperty({
@@ -45,12 +53,12 @@ export class CreateCompanyDto {
 
   @ApiProperty({
     description: "Site web de l'entreprise",
-    example: "https://www.entreprise.com",
+    example: 'https://www.entreprise.com',
     required: false,
   })
   @IsOptional()
-  @IsUrl({}, { message: "URL de site web invalide" })
-  @MaxLength(500, { message: "Le site web ne peut pas dépasser 500 caractères" })
+  @IsUrl({}, { message: 'URL de site web invalide' })
+  @MaxLength(500, { message: 'Le site web ne peut pas dépasser 500 caractères' })
   website?: string;
 
   @ApiProperty({
@@ -63,4 +71,3 @@ export class CreateCompanyDto {
   @Type(() => SocialNetworksDto)
   socialNetworks?: SocialNetworksDto;
 }
-

@@ -38,10 +38,13 @@ export class LoggingInterceptor implements NestInterceptor {
       tap(() => {
         const statusCode = response.statusCode;
         const duration = Date.now() - now;
-        const message = this.colorizeStatus(statusCode, `${statusCode} ${method} ${url} - ${duration}ms`);
+        const message = this.colorizeStatus(
+          statusCode,
+          `${statusCode} ${method} ${url} - ${duration}ms`,
+        );
         this.logger.log(message);
       }),
-      catchError((error) => {
+      catchError(error => {
         const duration = Date.now() - now;
         const statusCode = error instanceof HttpException ? error.getStatus() : 500;
 

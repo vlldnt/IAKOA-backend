@@ -40,7 +40,8 @@ export class EventsController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Créer un nouvel événement',
-    description: 'Crée un événement pour une entreprise dont l\'utilisateur connecté est propriétaire.',
+    description:
+      "Crée un événement pour une entreprise dont l'utilisateur connecté est propriétaire.",
   })
   @ApiBody({ type: CreateEventDto })
   @ApiResponse({
@@ -50,12 +51,12 @@ export class EventsController {
   })
   @ApiResponse({ status: 400, description: 'Données invalides' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
-  @ApiResponse({ status: 403, description: 'Accès refusé - vous devez être propriétaire de l\'entreprise' })
+  @ApiResponse({
+    status: 403,
+    description: "Accès refusé - vous devez être propriétaire de l'entreprise",
+  })
   @ApiResponse({ status: 404, description: 'Entreprise non trouvée' })
-  create(
-    @Body() createEventDto: CreateEventDto,
-    @GetUser() user: UserResponseDto,
-  ) {
+  create(@Body() createEventDto: CreateEventDto, @GetUser() user: UserResponseDto) {
     return this.eventsService.create(createEventDto, createEventDto.companyId, user.id);
   }
 
@@ -65,7 +66,8 @@ export class EventsController {
   @Get()
   @ApiOperation({
     summary: 'Récupérer tous les événements',
-    description: 'Retourne la liste de tous les événements publics. Accessible sans authentification.',
+    description:
+      'Retourne la liste de tous les événements publics. Accessible sans authentification.',
   })
   @ApiResponse({
     status: 200,
@@ -84,7 +86,8 @@ export class EventsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Récupérer mes événements',
-    description: 'Retourne tous les événements appartenant aux entreprises de l\'utilisateur connecté.',
+    description:
+      "Retourne tous les événements appartenant aux entreprises de l'utilisateur connecté.",
   })
   @ApiResponse({
     status: 200,
@@ -102,11 +105,12 @@ export class EventsController {
   @Get(':id')
   @ApiOperation({
     summary: 'Récupérer un événement par ID',
-    description: 'Retourne les détails d\'un événement spécifique. Accessible sans authentification.',
+    description:
+      "Retourne les détails d'un événement spécifique. Accessible sans authentification.",
   })
   @ApiParam({
     name: 'id',
-    description: 'ID de l\'événement',
+    description: "ID de l'événement",
     example: 'cm3xxxxxxxxxxxx',
   })
   @ApiResponse({
@@ -127,11 +131,11 @@ export class EventsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Mettre à jour un événement',
-    description: 'Met à jour partiellement les informations d\'un événement.',
+    description: "Met à jour partiellement les informations d'un événement.",
   })
   @ApiParam({
     name: 'id',
-    description: 'ID de l\'événement',
+    description: "ID de l'événement",
     example: 'cm3xxxxxxxxxxxx',
   })
   @ApiBody({ type: UpdateEventDto })
@@ -165,7 +169,7 @@ export class EventsController {
   })
   @ApiParam({
     name: 'id',
-    description: 'ID de l\'événement',
+    description: "ID de l'événement",
     example: 'cm3xxxxxxxxxxxx',
   })
   @ApiResponse({ status: 200, description: 'Événement supprimé avec succès' })

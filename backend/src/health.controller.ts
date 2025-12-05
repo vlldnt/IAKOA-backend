@@ -7,7 +7,7 @@ export class HealthController {
   @Get()
   @ApiOperation({
     summary: 'Health check',
-    description: 'Vérifie l\'état de santé de l\'application.',
+    description: "Vérifie l'état de santé de l'application.",
   })
   @ApiResponse({
     status: 200,

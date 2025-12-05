@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterUserDto {
   @ApiProperty({
-    description: 'Nom de l\'utilisateur',
+    description: "Nom de l'utilisateur",
     example: 'Jean Dupont',
     maxLength: 30,
   })
@@ -13,13 +13,13 @@ export class RegisterUserDto {
   name: string;
 
   @ApiProperty({
-    description: 'Adresse email de l\'utilisateur',
+    description: "Adresse email de l'utilisateur",
     example: 'jean.dupont@example.com',
     format: 'email',
   })
   @IsEmail({}, { message: 'Email invalide' })
   @Matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, {
-    message: 'Format d\'email invalide'
+    message: "Format d'email invalide",
   })
   email: string;
 
@@ -29,8 +29,7 @@ export class RegisterUserDto {
     minLength: 8,
   })
   @Matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s]).{8,}$/, {
-    message:
-      'Mot de passe: min 8, 1 majuscule, 1 chiffre, 1 spécial',
+    message: 'Mot de passe: min 8, 1 majuscule, 1 chiffre, 1 spécial',
   })
   password: string;
 }

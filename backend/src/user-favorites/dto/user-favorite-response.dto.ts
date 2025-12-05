@@ -14,19 +14,19 @@ export class UserFavoriteResponseDto {
   createdAt: Date;
 
   @ApiProperty({
-    description: 'ID de l\'utilisateur',
+    description: "ID de l'utilisateur",
     example: 'cm2xxxxxxxxxxxx',
   })
   userId: string;
 
   @ApiProperty({
-    description: 'ID de l\'événement',
+    description: "ID de l'événement",
     example: 'cm2yyyyyyyyyyyy',
   })
   eventId: string;
 
   @ApiProperty({
-    description: 'Informations sur l\'événement',
+    description: "Informations sur l'événement",
     required: false,
   })
   event?: {
@@ -40,7 +40,7 @@ export class UserFavoriteResponseDto {
   };
 
   @ApiProperty({
-    description: 'Informations sur l\'utilisateur',
+    description: "Informations sur l'utilisateur",
     required: false,
   })
   user?: {

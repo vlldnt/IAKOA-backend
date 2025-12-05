@@ -1,4 +1,12 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, ValidationPipe, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  ValidationPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from '../users/dto/register-user.dto';
@@ -19,8 +27,9 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: 'Inscription d\'un nouvel utilisateur',
-    description: 'Crée un nouveau compte utilisateur avec email et mot de passe. Retourne les tokens JWT. Le rôle et le statut de créateur sont définis automatiquement.',
+    summary: "Inscription d'un nouvel utilisateur",
+    description:
+      'Crée un nouveau compte utilisateur avec email et mot de passe. Retourne les tokens JWT. Le rôle et le statut de créateur sont définis automatiquement.',
   })
   @ApiBody({ type: RegisterUserDto })
   @ApiResponse({
@@ -76,7 +85,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
-    summary: 'Rafraîchir l\'access token',
+    summary: "Rafraîchir l'access token",
     description: 'Utilise le refresh token pour obtenir un nouvel access token.',
   })
   @ApiResponse({
@@ -104,7 +113,7 @@ export class AuthController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Déconnexion utilisateur',
-    description: 'Invalide le refresh token de l\'utilisateur.',
+    description: "Invalide le refresh token de l'utilisateur.",
   })
   @ApiResponse({ status: 200, description: 'Déconnexion réussie' })
   @ApiResponse({ status: 401, description: 'Token invalide' })

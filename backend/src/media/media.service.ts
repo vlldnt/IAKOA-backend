@@ -2,7 +2,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  ForbiddenException
+  ForbiddenException,
 } from '@nestjs/common';
 import { CreateMediaDto } from './dto/create-media.dto';
 import { MediaResponseDto } from './dto/media-response.dto';
@@ -18,21 +18,19 @@ export class MediaService {
     eventId: string,
   ): Promise<MediaResponseDto[]> {
     try {
-      const mediaData = createMediaDtos.map((dto) => ({
+      const mediaData = createMediaDtos.map(dto => ({
         url: dto.url,
         type: dto.type,
         eventId: eventId,
       }));
 
       const createdMedia = await this.prisma.$transaction(
-        mediaData.map((data) => this.prisma.media.create({ data })),
+        mediaData.map(data => this.prisma.media.create({ data })),
       );
 
-      return createdMedia.map((media) => new MediaResponseDto(media));
+      return createdMedia.map(media => new MediaResponseDto(media));
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Erreur lors de la création des médias.',
-      );
+      throw new InternalServerErrorException('Erreur lors de la création des médias.');
     }
   }
 
@@ -52,14 +50,12 @@ export class MediaService {
         orderBy: { createdAt: 'asc' },
       });
 
-      return media.map((m) => new MediaResponseDto(m));
+      return media.map(m => new MediaResponseDto(m));
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException(
-        'Erreur lors de la récupération des médias.',
-      );
+      throw new InternalServerErrorException('Erreur lors de la récupération des médias.');
     }
   }
 
@@ -82,7 +78,7 @@ export class MediaService {
       // Vérifier que l'utilisateur est le créateur de l'event (propriétaire de la company)
       if (userRole !== Role.ADMIN && event.company.ownerId !== userId) {
         throw new ForbiddenException(
-          'Vous ne pouvez accéder aux médias que des événements de vos propres entreprises.'
+          'Vous ne pouvez accéder aux médias que des événements de vos propres entreprises.',
         );
       }
 
@@ -91,14 +87,12 @@ export class MediaService {
         orderBy: { createdAt: 'asc' },
       });
 
-      return media.map((m) => new MediaResponseDto(m));
+      return media.map(m => new MediaResponseDto(m));
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof ForbiddenException) {
         throw error;
       }
-      throw new InternalServerErrorException(
-        'Erreur lors de la récupération des médias.',
-      );
+      throw new InternalServerErrorException('Erreur lors de la récupération des médias.');
     }
   }
 }

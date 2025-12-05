@@ -29,12 +29,7 @@ describe('AuthController', () => {
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [
-        AuthService,
-        UsersService,
-        JwtService,
-        PrismaService,
-      ],
+      providers: [AuthService, UsersService, JwtService, PrismaService],
     }).compile();
 
     await module.init();
@@ -81,9 +76,7 @@ describe('AuthController', () => {
     it('devrait rejeter une inscription avec un email en double', async () => {
       await authController.register(testUser);
 
-      await expect(
-        authController.register(testUser),
-      ).rejects.toThrow();
+      await expect(authController.register(testUser)).rejects.toThrow();
     });
 
     // Test 4: les tokens générés devraient être des chaînes non vides
@@ -220,7 +213,7 @@ describe('AuthController', () => {
     });
 
     // Test 12: devrait déconnecter l'utilisateur
-    it('devrait déconnecter l\'utilisateur', async () => {
+    it("devrait déconnecter l'utilisateur", async () => {
       const result = await authController.logout(mockUser);
 
       expect(result).toHaveProperty('message');

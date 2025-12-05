@@ -96,4 +96,3 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     return firstLine.length > 100 ? firstLine.substring(0, 100) + '...' : firstLine;
   }
 }
-    

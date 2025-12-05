@@ -1,5 +1,12 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
@@ -21,17 +28,22 @@ export class CompaniesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Créer une nouvelle entreprise',
-    description: 'Crée une entreprise associée à l\'utilisateur connecté. Réservé aux utilisateurs créateurs (isCreator = true).',
+    description:
+      "Crée une entreprise associée à l'utilisateur connecté. Réservé aux utilisateurs créateurs (isCreator = true).",
   })
   @ApiBody({ type: CreateCompanyDto })
-  @ApiResponse({ status: 201, description: 'Entreprise créée avec succès', type: CompanyResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Entreprise créée avec succès',
+    type: CompanyResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Données invalides' })
   @ApiResponse({ status: 401, description: 'Non authentifié ou utilisateur non créateur' })
-  @ApiResponse({ status: 403, description: 'Accès refusé - seuls les créateurs peuvent créer des entreprises' })
-  create(
-    @Body() createCompanyDto: CreateCompanyDto,
-    @GetUser() user: UserResponseDto,
-  ) {
+  @ApiResponse({
+    status: 403,
+    description: 'Accès refusé - seuls les créateurs peuvent créer des entreprises',
+  })
+  create(@Body() createCompanyDto: CreateCompanyDto, @GetUser() user: UserResponseDto) {
     return this.companiesService.create(createCompanyDto, user.id, user.isCreator);
   }
 
@@ -55,7 +67,7 @@ export class CompaniesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Récupérer mes entreprises',
-    description: 'Retourne toutes les entreprises appartenant à l\'utilisateur connecté.',
+    description: "Retourne toutes les entreprises appartenant à l'utilisateur connecté.",
   })
   @ApiResponse({ status: 200, description: 'Liste de mes entreprises', type: [CompanyResponseDto] })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -68,9 +80,9 @@ export class CompaniesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Récupérer une entreprise par ID',
-    description: 'Retourne les détails d\'une entreprise spécifique.',
+    description: "Retourne les détails d'une entreprise spécifique.",
   })
-  @ApiParam({ name: 'id', description: 'ID de l\'entreprise', example: 'cm3xxxxxxxxxxxx' })
+  @ApiParam({ name: 'id', description: "ID de l'entreprise", example: 'cm3xxxxxxxxxxxx' })
   @ApiResponse({ status: 200, description: 'Entreprise trouvée', type: CompanyResponseDto })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
@@ -84,11 +96,15 @@ export class CompaniesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Mettre à jour une entreprise',
-    description: 'Met à jour partiellement les informations d\'une entreprise.',
+    description: "Met à jour partiellement les informations d'une entreprise.",
   })
-  @ApiParam({ name: 'id', description: 'ID de l\'entreprise', example: 'cm3xxxxxxxxxxxx' })
+  @ApiParam({ name: 'id', description: "ID de l'entreprise", example: 'cm3xxxxxxxxxxxx' })
   @ApiBody({ type: UpdateCompanyDto })
-  @ApiResponse({ status: 200, description: 'Entreprise mise à jour avec succès', type: CompanyResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Entreprise mise à jour avec succès',
+    type: CompanyResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Données invalides' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
@@ -108,7 +124,7 @@ export class CompaniesController {
     summary: 'Supprimer une entreprise',
     description: 'Supprime définitivement une entreprise.',
   })
-  @ApiParam({ name: 'id', description: 'ID de l\'entreprise', example: 'cm3xxxxxxxxxxxx' })
+  @ApiParam({ name: 'id', description: "ID de l'entreprise", example: 'cm3xxxxxxxxxxxx' })
   @ApiResponse({ status: 200, description: 'Entreprise supprimée avec succès' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })

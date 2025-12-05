@@ -28,12 +28,7 @@ describe('AuthService', () => {
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AuthService,
-        UsersService,
-        JwtService,
-        PrismaService,
-      ],
+      providers: [AuthService, UsersService, JwtService, PrismaService],
     }).compile();
 
     await module.init();
@@ -217,9 +212,7 @@ describe('AuthService', () => {
 
     // Test 10: devrait échouer avec un ID utilisateur invalide
     it('devrait échouer avec un ID utilisateur invalide', async () => {
-      await expect(
-        authService.refreshTokens('invalid-user-id'),
-      ).rejects.toThrow();
+      await expect(authService.refreshTokens('invalid-user-id')).rejects.toThrow();
     });
   });
 
@@ -252,9 +245,9 @@ describe('AuthService', () => {
 
     // Test 12: devrait échouer avec un ID utilisateur invalide
     it('devrait échouer avec un ID utilisateur invalide', async () => {
-      await expect(
-        authService.logout('00000000-0000-0000-0000-000000000000'),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(authService.logout('00000000-0000-0000-0000-000000000000')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -282,18 +275,18 @@ describe('AuthService', () => {
 
     // Test 14: devrait rejeter un refresh token incorrect
     it('devrait rejeter un refresh token incorrect', async () => {
-      await expect(
-        authService.validateRefreshToken(userId, 'invalid-token'),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(authService.validateRefreshToken(userId, 'invalid-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     // Test 15: devrait rejeter si l'utilisateur n'a pas de refresh token
-    it('devrait rejeter si l\'utilisateur n\'a pas de refresh token', async () => {
+    it("devrait rejeter si l'utilisateur n'a pas de refresh token", async () => {
       await authService.logout(userId);
 
-      await expect(
-        authService.validateRefreshToken(userId, validRefreshToken),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(authService.validateRefreshToken(userId, validRefreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     // Test 16: devrait rejeter avec un ID utilisateur invalide
@@ -327,9 +320,7 @@ describe('AuthService', () => {
 
     // Test 18: devrait échouer avec un ID utilisateur invalide
     it('devrait échouer avec un ID utilisateur invalide', async () => {
-      await expect(
-        authService.validateUserById('invalid-id'),
-      ).rejects.toThrow();
+      await expect(authService.validateUserById('invalid-id')).rejects.toThrow();
     });
   });
 

@@ -9,13 +9,7 @@ import {
   HttpStatus,
   ValidationPipe,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiBody,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { UserFavoritesService } from './user-favorites.service';
 import { CreateUserFavoriteDto } from './dto/create-user-favorite.dto';
 import { UserFavoriteResponseDto } from './dto/user-favorite-response.dto';
@@ -32,7 +26,7 @@ export class UserFavoritesController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Ajouter un événement aux favoris',
-    description: 'Permet à un utilisateur d\'ajouter un événement à sa liste de favoris.',
+    description: "Permet à un utilisateur d'ajouter un événement à sa liste de favoris.",
   })
   @ApiBody({ type: CreateUserFavoriteDto })
   @ApiResponse({
@@ -50,7 +44,7 @@ export class UserFavoritesController {
   })
   @ApiResponse({
     status: 409,
-    description: 'L\'événement est déjà dans les favoris',
+    description: "L'événement est déjà dans les favoris",
   })
   create(@Body(ValidationPipe) createUserFavoriteDto: CreateUserFavoriteDto) {
     return this.userFavoritesService.create(createUserFavoriteDto);
@@ -61,17 +55,17 @@ export class UserFavoritesController {
    */
   @Get('user/:userId')
   @ApiOperation({
-    summary: 'Obtenir tous les favoris d\'un utilisateur',
-    description: 'Retourne la liste de tous les événements favoris d\'un utilisateur.',
+    summary: "Obtenir tous les favoris d'un utilisateur",
+    description: "Retourne la liste de tous les événements favoris d'un utilisateur.",
   })
   @ApiParam({
     name: 'userId',
-    description: 'ID de l\'utilisateur',
+    description: "ID de l'utilisateur",
     example: 'cm2xxxxxxxxxxxx',
   })
   @ApiResponse({
     status: 200,
-    description: 'Liste des favoris de l\'utilisateur',
+    description: "Liste des favoris de l'utilisateur",
     type: [UserFavoriteResponseDto],
   })
   @ApiResponse({
@@ -88,16 +82,17 @@ export class UserFavoritesController {
   @Get('event/:eventId')
   @ApiOperation({
     summary: 'Obtenir les utilisateurs ayant mis un événement en favori',
-    description: 'Retourne la liste de tous les utilisateurs qui ont ajouté un événement à leurs favoris.',
+    description:
+      'Retourne la liste de tous les utilisateurs qui ont ajouté un événement à leurs favoris.',
   })
   @ApiParam({
     name: 'eventId',
-    description: 'ID de l\'événement',
+    description: "ID de l'événement",
     example: 'cm2yyyyyyyyyyyy',
   })
   @ApiResponse({
     status: 200,
-    description: 'Liste des utilisateurs ayant mis l\'événement en favori',
+    description: "Liste des utilisateurs ayant mis l'événement en favori",
     type: [UserFavoriteResponseDto],
   })
   @ApiResponse({
@@ -118,12 +113,12 @@ export class UserFavoritesController {
   })
   @ApiParam({
     name: 'userId',
-    description: 'ID de l\'utilisateur',
+    description: "ID de l'utilisateur",
     example: 'cm2xxxxxxxxxxxx',
   })
   @ApiParam({
     name: 'eventId',
-    description: 'ID de l\'événement',
+    description: "ID de l'événement",
     example: 'cm2yyyyyyyyyyyy',
   })
   @ApiResponse({
@@ -136,10 +131,7 @@ export class UserFavoritesController {
       },
     },
   })
-  async isFavorite(
-    @Param('userId') userId: string,
-    @Param('eventId') eventId: string,
-  ) {
+  async isFavorite(@Param('userId') userId: string, @Param('eventId') eventId: string) {
     const isFavorite = await this.userFavoritesService.isFavorite(userId, eventId);
     return { isFavorite };
   }
@@ -149,12 +141,12 @@ export class UserFavoritesController {
    */
   @Get('event/:eventId/count')
   @ApiOperation({
-    summary: 'Compter les favoris d\'un événement',
-    description: 'Retourne le nombre d\'utilisateurs ayant ajouté un événement à leurs favoris.',
+    summary: "Compter les favoris d'un événement",
+    description: "Retourne le nombre d'utilisateurs ayant ajouté un événement à leurs favoris.",
   })
   @ApiParam({
     name: 'eventId',
-    description: 'ID de l\'événement',
+    description: "ID de l'événement",
     example: 'cm2yyyyyyyyyyyy',
   })
   @ApiResponse({
@@ -183,12 +175,12 @@ export class UserFavoritesController {
   })
   @ApiParam({
     name: 'userId',
-    description: 'ID de l\'utilisateur',
+    description: "ID de l'utilisateur",
     example: 'cm2xxxxxxxxxxxx',
   })
   @ApiParam({
     name: 'eventId',
-    description: 'ID de l\'événement',
+    description: "ID de l'événement",
     example: 'cm2yyyyyyyyyyyy',
   })
   @ApiResponse({
@@ -205,10 +197,7 @@ export class UserFavoritesController {
     status: 404,
     description: 'Favori non trouvé',
   })
-  remove(
-    @Param('userId') userId: string,
-    @Param('eventId') eventId: string,
-  ) {
+  remove(@Param('userId') userId: string, @Param('eventId') eventId: string) {
     return this.userFavoritesService.remove(userId, eventId);
   }
 
@@ -218,12 +207,12 @@ export class UserFavoritesController {
   @Delete('user/:userId/all')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Supprimer tous les favoris d\'un utilisateur',
-    description: 'Supprime tous les événements favoris d\'un utilisateur.',
+    summary: "Supprimer tous les favoris d'un utilisateur",
+    description: "Supprime tous les événements favoris d'un utilisateur.",
   })
   @ApiParam({
     name: 'userId',
-    description: 'ID de l\'utilisateur',
+    description: "ID de l'utilisateur",
     example: 'cm2xxxxxxxxxxxx',
   })
   @ApiResponse({
@@ -234,7 +223,7 @@ export class UserFavoritesController {
       properties: {
         message: {
           type: 'string',
-          example: 'Tous les favoris de l\'utilisateur ont été supprimés',
+          example: "Tous les favoris de l'utilisateur ont été supprimés",
         },
         count: { type: 'number', example: 5 },
       },

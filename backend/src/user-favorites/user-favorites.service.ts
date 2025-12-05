@@ -3,7 +3,7 @@ import {
   ConflictException,
   NotFoundException,
   InternalServerErrorException,
-  BadRequestException
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserFavoriteDto } from './dto/create-user-favorite.dto';
@@ -24,7 +24,9 @@ export class UserFavoritesService {
       });
 
       if (!userExists) {
-        throw new NotFoundException(`Utilisateur avec l'ID ${createUserFavoriteDto.userId} non trouvé`);
+        throw new NotFoundException(
+          `Utilisateur avec l'ID ${createUserFavoriteDto.userId} non trouvé`,
+        );
       }
 
       // Vérifier que l'événement existe
@@ -33,7 +35,9 @@ export class UserFavoritesService {
       });
 
       if (!eventExists) {
-        throw new NotFoundException(`Événement avec l'ID ${createUserFavoriteDto.eventId} non trouvé`);
+        throw new NotFoundException(
+          `Événement avec l'ID ${createUserFavoriteDto.eventId} non trouvé`,
+        );
       }
 
       // Créer le favori
@@ -61,13 +65,9 @@ export class UserFavoritesService {
         throw error;
       }
       if (error.code === 'P2002') {
-        throw new ConflictException(
-          `L'utilisateur a déjà ajouté cet événement à ses favoris`
-        );
+        throw new ConflictException(`L'utilisateur a déjà ajouté cet événement à ses favoris`);
       }
-      throw new InternalServerErrorException(
-        'Erreur lors de l\'ajout du favori'
-      );
+      throw new InternalServerErrorException("Erreur lors de l'ajout du favori");
     }
   }
 
@@ -100,9 +100,7 @@ export class UserFavoritesService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException(
-        'Erreur lors de la récupération des favoris'
-      );
+      throw new InternalServerErrorException('Erreur lors de la récupération des favoris');
     }
   }
 
@@ -142,9 +140,7 @@ export class UserFavoritesService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException(
-        'Erreur lors de la récupération des favoris'
-      );
+      throw new InternalServerErrorException('Erreur lors de la récupération des favoris');
     }
   }
 
@@ -164,9 +160,7 @@ export class UserFavoritesService {
 
       return !!favorite;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Erreur lors de la vérification du favori'
-      );
+      throw new InternalServerErrorException('Erreur lors de la vérification du favori');
     }
   }
 
@@ -187,7 +181,7 @@ export class UserFavoritesService {
 
       if (!favorite) {
         throw new NotFoundException(
-          `Favori non trouvé pour l'utilisateur ${userId} et l'événement ${eventId}`
+          `Favori non trouvé pour l'utilisateur ${userId} et l'événement ${eventId}`,
         );
       }
 
@@ -205,9 +199,7 @@ export class UserFavoritesService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException(
-        'Erreur lors de la suppression du favori'
-      );
+      throw new InternalServerErrorException('Erreur lors de la suppression du favori');
     }
   }
 
@@ -220,9 +212,7 @@ export class UserFavoritesService {
         where: { eventId },
       });
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Erreur lors du comptage des favoris'
-      );
+      throw new InternalServerErrorException('Erreur lors du comptage des favoris');
     }
   }
 
@@ -236,13 +226,11 @@ export class UserFavoritesService {
       });
 
       return {
-        message: 'Tous les favoris de l\'utilisateur ont été supprimés',
+        message: "Tous les favoris de l'utilisateur ont été supprimés",
         count: result.count,
       };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Erreur lors de la suppression des favoris'
-      );
+      throw new InternalServerErrorException('Erreur lors de la suppression des favoris');
     }
   }
 }

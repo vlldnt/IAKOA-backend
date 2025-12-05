@@ -11,19 +11,21 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // Activer la validation globale avec messages d'erreur personnalisés
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-    transformOptions: {
-      enableImplicitConversion: true,
-    },
-    disableErrorMessages: false,
-    validationError: {
-      target: false,
-      value: false,
-    },
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+      disableErrorMessages: false,
+      validationError: {
+        target: false,
+        value: false,
+      },
+    }),
+  );
 
   // Activer CORS
   app.enableCors();

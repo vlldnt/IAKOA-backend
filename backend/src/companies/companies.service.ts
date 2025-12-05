@@ -1,4 +1,9 @@
-import { Injectable, ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CompanyResponseDto } from './dto/company-response.dto';
@@ -7,13 +12,17 @@ import { Role } from '@prisma/client';
 
 @Injectable()
 export class CompaniesService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
-  async create(createCompanyDto: CreateCompanyDto, userId: string, isCreator: boolean): Promise<CompanyResponseDto> {
+  async create(
+    createCompanyDto: CreateCompanyDto,
+    userId: string,
+    isCreator: boolean,
+  ): Promise<CompanyResponseDto> {
     // Vérifier que l'utilisateur est un créateur
     if (!isCreator) {
       throw new UnauthorizedException(
-        'Seuls les utilisateurs créateurs peuvent créer des entreprises. Contactez un administrateur pour obtenir ce statut.'
+        'Seuls les utilisateurs créateurs peuvent créer des entreprises. Contactez un administrateur pour obtenir ce statut.',
       );
     }
 
@@ -24,7 +33,9 @@ export class CompaniesService {
           siren: createCompanyDto.siren,
           description: createCompanyDto.description ?? undefined,
           website: createCompanyDto.website ?? undefined,
-          socialNetworks: createCompanyDto.socialNetworks ? JSON.parse(JSON.stringify(createCompanyDto.socialNetworks)) : undefined,
+          socialNetworks: createCompanyDto.socialNetworks
+            ? JSON.parse(JSON.stringify(createCompanyDto.socialNetworks))
+            : undefined,
           isValidated: createCompanyDto.isValidated ?? false,
           ownerId: userId,
         },
@@ -33,7 +44,9 @@ export class CompaniesService {
       return new CompanyResponseDto(company);
     } catch (error) {
       if (error.code === 'P2002') {
-        throw new ConflictException(`Une entreprise avec le SIREN ${createCompanyDto.siren} existe déjà.`);
+        throw new ConflictException(
+          `Une entreprise avec le SIREN ${createCompanyDto.siren} existe déjà.`,
+        );
       }
       throw error;
     }
@@ -41,7 +54,7 @@ export class CompaniesService {
 
   async findAll(): Promise<CompanyResponseDto[]> {
     const companies = await this.prisma.company.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
     return companies.map(company => new CompanyResponseDto(company));
   }
@@ -49,7 +62,7 @@ export class CompaniesService {
   async findAllByOwner(userId: string): Promise<CompanyResponseDto[]> {
     const companies = await this.prisma.company.findMany({
       where: { ownerId: userId },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
     return companies.map(company => new CompanyResponseDto(company));
   }
@@ -70,7 +83,12 @@ export class CompaniesService {
     return new CompanyResponseDto(company);
   }
 
-  async update(id: string, updateCompanyDto: UpdateCompanyDto, userId: string, userRole: Role): Promise<CompanyResponseDto> {
+  async update(
+    id: string,
+    updateCompanyDto: UpdateCompanyDto,
+    userId: string,
+    userRole: Role,
+  ): Promise<CompanyResponseDto> {
     const company = await this.prisma.company.findUnique({
       where: { id },
     });
@@ -91,7 +109,9 @@ export class CompaniesService {
           siren: updateCompanyDto.siren ?? undefined,
           description: updateCompanyDto.description ?? undefined,
           website: updateCompanyDto.website ?? undefined,
-          socialNetworks: updateCompanyDto.socialNetworks ? JSON.parse(JSON.stringify(updateCompanyDto.socialNetworks)) : undefined,
+          socialNetworks: updateCompanyDto.socialNetworks
+            ? JSON.parse(JSON.stringify(updateCompanyDto.socialNetworks))
+            : undefined,
           isValidated: updateCompanyDto.isValidated ?? undefined,
         },
       });
@@ -99,7 +119,9 @@ export class CompaniesService {
       return new CompanyResponseDto(updatedCompany);
     } catch (error) {
       if (error.code === 'P2002') {
-        throw new ConflictException(`Une entreprise avec le SIREN ${updateCompanyDto.siren} existe déjà.`);
+        throw new ConflictException(
+          `Une entreprise avec le SIREN ${updateCompanyDto.siren} existe déjà.`,
+        );
       }
       if (error.code === 'P2025') {
         throw new NotFoundException(`Entreprise avec l'ID ${id} non trouvée.`);
