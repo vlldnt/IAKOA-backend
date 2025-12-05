@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { ConflictException } from '@nestjs/common/exceptions/conflict.exception';
+import { validate } from 'class-validator';
+import { CreateUserDto } from './dto/create-user.dto';
 
 describe('UsersService', () => {
   let usersService: UsersService;
@@ -36,15 +39,31 @@ describe('UsersService', () => {
   });
 
   describe('Creer un user valide', () => {
-    it('devrait créer un nouvel utilisateur', async () => {
+    it('devrait créer un nouvel utilisateur avec isCreator=false par défaut', async () => {
       const newUser = await usersService.create(testUser);
 
       expect(newUser).toHaveProperty('id');
       expect(newUser.name).toBe(testUser.name);
       expect(newUser.email).toBe(testUser.email);
       expect(newUser.createdAt).toBeInstanceOf(Date);
+      expect(newUser.updatedAt).toBeInstanceOf(Date);
       expect(newUser.isCreator).toBe(false);
+      expect(newUser.role).toBe('USER');
       expect(newUser).not.toHaveProperty('password');
+      expect(newUser).not.toHaveProperty('refreshToken');
+    });
+
+    it('devrait créer un créateur avec isCreator=true', async () => {
+      const creatorUser = {
+        ...testUser,
+        email: 'creator@example.com',
+        isCreator: true,
+      };
+
+      const newUser = await usersService.create(creatorUser);
+
+      expect(newUser.isCreator).toBe(true);
+      expect(newUser.email).toBe('creator@example.com');
     });
 
     it('ne devrait pas montrer le mot de passe dans la réponse', async () => {
@@ -55,18 +74,218 @@ describe('UsersService', () => {
       expect(newUser).not.toHaveProperty('password');
     });
 
-    it("devrait lancer une ConflictException si l'email existe déjà", async () => {
-      await usersService.create(testUser);
+    it('ne devrait pas montrer le refreshToken dans la réponse', async () => {
+      const newUser = await usersService.create({
+        ...testUser,
+        email: 'token@example.com',
+      });
+      expect(newUser).not.toHaveProperty('refreshToken');
+    });
 
-      await expect(usersService.create(testUser)).rejects.toThrow('Cet email est déjà utilisé');
+    it('devrait hasher le mot de passe avant de le sauvegarder', async () => {
+      const newUser = await usersService.create({
+        ...testUser,
+        email: 'hash@example.com',
+      });
+
+      // Récupérer l'utilisateur directement depuis la DB
+      const userInDb = await prismaService.user.findUnique({
+        where: { id: newUser.id },
+      });
+
+      expect(userInDb?.password).not.toBe(testUser.password);
+      expect(userInDb?.password).toMatch(/^\$2[aby]\$.{56}$/);
     });
   });
 
-  describe('création avec donénes mauvaises', () => {
-    it('devrait lancer une erreur si le nom est manquant', async () => {
-      const wrongName = { ...testUser, name: '' };
+  // Validation DTO avec class-validator
+  describe('validation DTO avec class-validator', () => {
+    it('devrait valider un DTO correct', async () => {
+      const dto = new CreateUserDto();
+      Object.assign(dto, testUser);
 
-      await expect(usersService.create(wrongName)).rejects.toThrow('Le nom est requis');
+      const errors = await validate(dto);
+      expect(errors.length).toBe(0);
+    });
+
+    it('devrait échouer si le nom est vide', async () => {
+      const dto = new CreateUserDto();
+      Object.assign(dto, { ...testUser, name: '' });
+
+      const errors = await validate(dto);
+      expect(errors.length).toBeGreaterThan(0);
+      
+      const nameError = errors.find(e => e.property === 'name');
+      expect(nameError).toBeDefined();
+      expect(Object.values(nameError?.constraints || {})).toContain(
+        'Le nom ne peut pas être vide'
+      );
+    });
+
+    it('devrait échouer si le nom dépasse 30 caractères', async () => {
+      const dto = new CreateUserDto();
+      Object.assign(dto, { ...testUser, name: 'a'.repeat(31) });
+
+      const errors = await validate(dto);
+      expect(errors.length).toBeGreaterThan(0);
+      
+      const nameError = errors.find(e => e.property === 'name');
+      expect(nameError).toBeDefined();
+      expect(Object.values(nameError?.constraints || {})).toContain(
+        'Le nom ne peut pas dépasser 30 caractères'
+      );
+    });
+
+    it("devrait échouer si l'email est vide", async () => {
+      const dto = new CreateUserDto();
+      Object.assign(dto, { ...testUser, email: '' });
+
+      const errors = await validate(dto);
+      expect(errors.length).toBeGreaterThan(0);
+      
+      const emailError = errors.find(e => e.property === 'email');
+      expect(emailError).toBeDefined();
+      expect(Object.values(emailError?.constraints || {})).toContain(
+        'Email invalide'
+      );
+    });
+
+    it('devrait échouer si le format email est invalide', async () => {
+      const dto = new CreateUserDto();
+      Object.assign(dto, { ...testUser, email: 'not-an-email' });
+
+      const errors = await validate(dto);
+      expect(errors.length).toBeGreaterThan(0);
+      
+      const emailError = errors.find(e => e.property === 'email');
+      expect(emailError).toBeDefined();
+      const messages = Object.values(emailError?.constraints || {});
+      expect(
+        messages.some(msg => msg === 'Email invalide' || msg === "Format d'email invalide")
+      ).toBe(true);
+    });
+
+    it('devrait échouer si le mot de passe est trop court', async () => {
+      const dto = new CreateUserDto();
+      Object.assign(dto, { ...testUser, password: 'Pass1!' });
+
+      const errors = await validate(dto);
+      expect(errors.length).toBeGreaterThan(0);
+      
+      const passwordError = errors.find(e => e.property === 'password');
+      expect(passwordError).toBeDefined();
+    });
+
+    it('devrait échouer si le mot de passe manque une majuscule', async () => {
+      const dto = new CreateUserDto();
+      Object.assign(dto, { ...testUser, password: 'password123!' });
+
+      const errors = await validate(dto);
+      expect(errors.length).toBeGreaterThan(0);
+      
+      const passwordError = errors.find(e => e.property === 'password');
+      expect(passwordError).toBeDefined();
+    });
+
+    it('devrait échouer si le mot de passe manque un chiffre', async () => {
+      const dto = new CreateUserDto();
+      Object.assign(dto, { ...testUser, password: 'Password!' });
+
+      const errors = await validate(dto);
+      expect(errors.length).toBeGreaterThan(0);
+      
+      const passwordError = errors.find(e => e.property === 'password');
+      expect(passwordError).toBeDefined();
+    });
+
+    it('devrait échouer si le mot de passe manque un caractère spécial', async () => {
+      const dto = new CreateUserDto();
+      Object.assign(dto, { ...testUser, password: 'Password123' });
+
+      const errors = await validate(dto);
+      expect(errors.length).toBeGreaterThan(0);
+      
+      const passwordError = errors.find(e => e.property === 'password');
+      expect(passwordError).toBeDefined();
+    });
+
+    it('devrait échouer si le mot de passe ne respecte pas les critères', async () => {
+      const dto = new CreateUserDto();
+      Object.assign(dto, { ...testUser, password: 'faible' });
+
+      const errors = await validate(dto);
+      expect(errors.length).toBeGreaterThan(0);
+      
+      const passwordError = errors.find(e => e.property === 'password');
+      expect(passwordError).toBeDefined();
+      expect(Object.values(passwordError?.constraints || {})).toContain(
+        'Mot de passe: min 8, 1 majuscule, 1 chiffre, 1 spécial'
+      );
+    });
+  });
+
+  // Tests logique métier du service
+  describe('logique métier du service', () => {
+    it("devrait lancer une ConflictException si l'email existe déjà", async () => {
+      await usersService.create(testUser);
+
+      await expect(usersService.create(testUser)).rejects.toThrow(
+        ConflictException,
+      );
+    });
+  });
+
+  // Tests findAll()
+  describe('findAll', () => {
+    it('devrait retourner un tableau vide si aucun utilisateur', async () => {
+      const users = await usersService.findAll();
+
+      expect(users).toEqual([]);
+      expect(users.length).toBe(0);
+    });
+
+    it('devrait retourner tous les utilisateurs', async () => {
+      // Créer plusieurs utilisateurs
+      await usersService.create(testUser);
+      await usersService.create({ ...testUser, email: 'user2@example.com' });
+      await usersService.create({ ...testUser, email: 'user3@example.com' });
+
+      const users = await usersService.findAll();
+
+      expect(users.length).toBe(3);
+      expect(users[0]).toHaveProperty('id');
+      expect(users[0]).toHaveProperty('name');
+      expect(users[0]).toHaveProperty('email');
+    });
+
+    it('ne devrait pas exposer les mots de passe', async () => {
+      await usersService.create(testUser);
+      await usersService.create({ ...testUser, email: 'user2@example.com' });
+
+      const users = await usersService.findAll();
+
+      users.forEach(user => {
+        expect(user).not.toHaveProperty('password');
+        expect(user).not.toHaveProperty('refreshToken');
+      });
+    });
+
+    it('devrait retourner les utilisateurs triés par date (plus récent en premier)', async () => {
+      // Créer 3 utilisateurs avec un petit délai
+      const user1 = await usersService.create(testUser);
+      await new Promise(resolve => setTimeout(resolve, 10));
+      
+      const user2 = await usersService.create({ ...testUser, email: 'user2@example.com' });
+      await new Promise(resolve => setTimeout(resolve, 10));
+      
+      const user3 = await usersService.create({ ...testUser, email: 'user3@example.com' });
+
+      const users = await usersService.findAll();
+
+      // Le plus récent (user3) doit être en premier
+      expect(users[0].id).toBe(user3.id);
+      expect(users[1].id).toBe(user2.id);
+      expect(users[2].id).toBe(user1.id);
     });
   });
 });

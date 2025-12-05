@@ -9,8 +9,9 @@ export class CreateUserDto {
     example: 'Jean Dupont',
     maxLength: 30,
   })
-  @IsString()
+  @IsString({ message: 'Le nom doit être une chaîne de caractères' })
   @MaxLength(30, { message: 'Le nom ne peut pas dépasser 30 caractères' })
+  @Matches(/^(?!\s*$).+/, { message: 'Le nom ne peut pas être vide' })
   name: string;
 
   @ApiProperty({
@@ -29,6 +30,7 @@ export class CreateUserDto {
     example: 'Password123!',
     minLength: 8,
   })
+  @IsString({ message: 'Le mot de passe doit être une chaîne de caractères' })
   @Matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s]).{8,}$/, {
     message: 'Mot de passe: min 8, 1 majuscule, 1 chiffre, 1 spécial',
   })
