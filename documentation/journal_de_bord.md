@@ -82,3 +82,15 @@
 - Configuration Jest pour tests unitaires avec base de données de test séparée (iakoa-tests)
 - Implémentation complète des tests d'authentification : 34 tests (service + controller) couvrant register, login, refresh token, validation des DTOs, gestion des erreurs
 
+---
+
+## 05/12/2025
+
+- Tests ajoutés pour UsersService : findAll(), findOne(), update(), delete() avec validation des erreurs
+- Validation renforcée dans CreateUserDto : contraintes sur username, email, password, firstName, lastName
+- Implémentation de JwtAuthGuard global avec décorateur @Public pour routes publiques
+- Création de OwnerGuard pour contrôle d'accès aux ressources utilisateur (vérification owner vs user)
+- Mise à jour de UsersController : application des guards d'authentification et de propriété
+- Refactorisation de UserFavoritesController et UserFavoritesService : application des guards
+- Ajout de LoggingInterceptor pour tracer les requêtes HTTP
+
