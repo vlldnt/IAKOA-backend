@@ -114,12 +114,10 @@ describe('UsersService', () => {
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      
+
       const nameError = errors.find(e => e.property === 'name');
       expect(nameError).toBeDefined();
-      expect(Object.values(nameError?.constraints || {})).toContain(
-        'Le nom ne peut pas être vide'
-      );
+      expect(Object.values(nameError?.constraints || {})).toContain('Le nom ne peut pas être vide');
     });
 
     it('devrait échouer si le nom dépasse 30 caractères', async () => {
@@ -128,11 +126,11 @@ describe('UsersService', () => {
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      
+
       const nameError = errors.find(e => e.property === 'name');
       expect(nameError).toBeDefined();
       expect(Object.values(nameError?.constraints || {})).toContain(
-        'Le nom ne peut pas dépasser 30 caractères'
+        'Le nom ne peut pas dépasser 30 caractères',
       );
     });
 
@@ -142,12 +140,10 @@ describe('UsersService', () => {
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      
+
       const emailError = errors.find(e => e.property === 'email');
       expect(emailError).toBeDefined();
-      expect(Object.values(emailError?.constraints || {})).toContain(
-        'Email invalide'
-      );
+      expect(Object.values(emailError?.constraints || {})).toContain('Email invalide');
     });
 
     it('devrait échouer si le format email est invalide', async () => {
@@ -156,12 +152,12 @@ describe('UsersService', () => {
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      
+
       const emailError = errors.find(e => e.property === 'email');
       expect(emailError).toBeDefined();
       const messages = Object.values(emailError?.constraints || {});
       expect(
-        messages.some(msg => msg === 'Email invalide' || msg === "Format d'email invalide")
+        messages.some(msg => msg === 'Email invalide' || msg === "Format d'email invalide"),
       ).toBe(true);
     });
 
@@ -171,7 +167,7 @@ describe('UsersService', () => {
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      
+
       const passwordError = errors.find(e => e.property === 'password');
       expect(passwordError).toBeDefined();
     });
@@ -182,7 +178,7 @@ describe('UsersService', () => {
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      
+
       const passwordError = errors.find(e => e.property === 'password');
       expect(passwordError).toBeDefined();
     });
@@ -193,7 +189,7 @@ describe('UsersService', () => {
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      
+
       const passwordError = errors.find(e => e.property === 'password');
       expect(passwordError).toBeDefined();
     });
@@ -204,7 +200,7 @@ describe('UsersService', () => {
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      
+
       const passwordError = errors.find(e => e.property === 'password');
       expect(passwordError).toBeDefined();
     });
@@ -215,11 +211,11 @@ describe('UsersService', () => {
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      
+
       const passwordError = errors.find(e => e.property === 'password');
       expect(passwordError).toBeDefined();
       expect(Object.values(passwordError?.constraints || {})).toContain(
-        'Mot de passe: min 8, 1 majuscule, 1 chiffre, 1 spécial'
+        'Mot de passe: min 8, 1 majuscule, 1 chiffre, 1 spécial',
       );
     });
   });
@@ -229,9 +225,7 @@ describe('UsersService', () => {
     it("devrait lancer une ConflictException si l'email existe déjà", async () => {
       await usersService.create(testUser);
 
-      await expect(usersService.create(testUser)).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(usersService.create(testUser)).rejects.toThrow(ConflictException);
     });
   });
 
@@ -274,10 +268,10 @@ describe('UsersService', () => {
       // Créer 3 utilisateurs avec un petit délai
       const user1 = await usersService.create(testUser);
       await new Promise(resolve => setTimeout(resolve, 10));
-      
+
       const user2 = await usersService.create({ ...testUser, email: 'user2@example.com' });
       await new Promise(resolve => setTimeout(resolve, 10));
-      
+
       const user3 = await usersService.create({ ...testUser, email: 'user3@example.com' });
 
       const users = await usersService.findAll();
@@ -286,6 +280,28 @@ describe('UsersService', () => {
       expect(users[0].id).toBe(user3.id);
       expect(users[1].id).toBe(user2.id);
       expect(users[2].id).toBe(user1.id);
+    });
+  });
+
+  describe('findOne', () => {
+    it('devrait retourner un utilisateur par ID', async () => {
+      const newUser = await usersService.create(testUser);
+
+      const foundUser = await usersService.findOne(newUser.id);
+
+      expect(foundUser.id).toBe(newUser.id);
+      expect(foundUser.email).toBe(newUser.email);
+    });
+
+    it("devrait lancer une NotFoundException si l'utilisateur n'existe pas ou si l'ID est invalide", async () => {
+      const fakeId = '00000000-0000-0000-0000-000000000000';
+
+      await expect(usersService.findOne(fakeId)).rejects.toThrow(
+        `Utilisateur avec l'ID ${fakeId} non trouvé.`,
+      );
+      await expect(usersService.findOne('')).rejects.toThrow(
+        'invalid input syntax for type uuid: ""',
+      );
     });
   });
 });
