@@ -52,6 +52,7 @@ export class EventsService {
             : undefined,
           companyId: companyId,
           website: createEventDto.website,
+          categories: createEventDto.categories || [],
         },
       });
 
@@ -172,6 +173,7 @@ export class EventsService {
             ? JSON.parse(JSON.stringify(updateEventDto.location))
             : undefined,
           website: updateEventDto.website ?? undefined,
+          categories: updateEventDto.categories ?? undefined,
         },
         include: { media: true },
       });

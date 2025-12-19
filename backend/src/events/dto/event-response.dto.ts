@@ -1,6 +1,6 @@
 // Réponse API évènement: format de sortie
 import { ApiProperty } from '@nestjs/swagger';
-import { Event } from '@prisma/client';
+import { Event, EventCategory } from '@prisma/client';
 import { MediaResponseDto } from '../../media/dto/media-response.dto';
 
 export class EventResponseDto {
@@ -73,6 +73,14 @@ export class EventResponseDto {
   website: string | null;
 
   @ApiProperty({
+    description: "Catégories de l'évènement",
+    enum: EventCategory,
+    isArray: true,
+    example: ['CONCERT', 'BAR', 'SOIREE'],
+  })
+  categories: EventCategory[];
+
+  @ApiProperty({
     description: "Liste des médias associés à l'évènement",
     type: [MediaResponseDto],
     example: [
@@ -99,6 +107,7 @@ export class EventResponseDto {
     this.location = event.location as Record<string, any>;
     this.companyId = event.companyId;
     this.website = event.website;
+    this.categories = event.categories;
     this.media = event.media ? event.media.map(m => new MediaResponseDto(m)) : [];
   }
 }

@@ -10,10 +10,12 @@ import {
   IsObject,
   IsArray,
   ValidateNested,
+  IsEnum,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { CreateMediaDto } from '../../media/dto/create-media.dto';
+import { EventCategory } from '@prisma/client';
 
 export class CreateEventDto {
   @ApiProperty({ description: "Nom de l'événement", maxLength: 100, example: 'Concert de Jazz' })
@@ -72,6 +74,18 @@ export class CreateEventDto {
   @IsOptional()
   @IsUrl({}, { message: 'Le site web doit être une URL valide.' })
   website?: string;
+
+  @ApiProperty({
+    description: "Catégories de l'événement",
+    required: false,
+    enum: EventCategory,
+    isArray: true,
+    example: ['CONCERT', 'BAR', 'SOIREE'],
+  })
+  @IsOptional()
+  @IsArray({ message: 'Les catégories doivent être un tableau.' })
+  @IsEnum(EventCategory, { each: true, message: 'Chaque catégorie doit être une valeur valide de EventCategory.' })
+  categories?: EventCategory[];
 
   @ApiProperty({
     description: "Liste des médias associés à l'événement",

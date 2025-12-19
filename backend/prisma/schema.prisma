@@ -15,6 +15,79 @@ enum Role {
   ADMIN
 }
 
+enum EventCategory {
+  CONCERT
+  CINEMA
+  THEATRE
+  SPECTACLE
+  FANFARE
+  DANSE
+  COURSDEDANSE
+  ART
+  PEINTURE
+  PHOTOGRAPHIE
+  EXPOSITION
+  MUSEE
+  LANCEMENTDELIVRE
+  ENFANTS
+  JEUX
+  JEUXVIDEO
+  SOIREEJEUX
+  LECTURE
+  REPAS
+  DEJEUNER
+  COURSDECUISINE
+  DEGUSTATION
+  SOIREE
+  BAR
+  FESTIVAL
+  FETELOCALE
+  FERIA
+  NATURE
+  RANDONNEE
+  TRAIL
+  OUTDOOR
+  MARCHE
+  NEIGE
+  NAUTISME
+  AVENTURE
+  YOGA
+  MEDITATION
+  BIENETRE
+  DEVELOPPEMENTPERSONNEL
+  CONFERENCE
+  FORMATION
+  LANGUES
+  SALONPROFESSIONNEL
+  SCIENCE
+  DECOUVERTE
+  PATRIMOINE
+  VISITE
+  ATELIER
+  BRICOLAGE
+  MODE
+  ANIMAUX
+  JARDINAGE
+  FERME
+  BENEVOLAT
+  ECOLOGIE
+  SOLIDARITE
+  RENCONTRE
+  EVENEMENTCARITATIF
+  ESPORT
+  TECHNOLOGIE
+  MANGA
+  COSPLAY
+  TOURNOIJEUXVIDEO
+  BROCANTE
+  VIDEGRENIER
+  ENCHERES
+  SPORT
+  COMPETITION
+  RENCONTRESPORTIVE
+  JOURNEE
+}
+
 model User {
   id        String   @id @default(uuid()) @db.Uuid
   createdAt DateTime @default(now()) @db.Timestamptz(3)
@@ -61,14 +134,15 @@ model Event {
   createdAt DateTime @default(now()) @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
-  name          String         @db.VarChar(100)
-  date          DateTime       @db.Timestamptz(3)
-  description   String         @db.VarChar(5000)
-  pricing       Int            @default(0)
-  location      Json           @db.JsonB
-  companyId     String         @db.Uuid
+  name          String          @db.VarChar(100)
+  date          DateTime        @db.Timestamptz(3)
+  description   String          @db.VarChar(5000)
+  pricing       Int             @default(0)
+  location      Json            @db.JsonB
+  companyId     String          @db.Uuid
   website       String?
-  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  categories    EventCategory[]
+  company       Company         @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   media         Media[]
   userFavorites UserFavorite[]
 
