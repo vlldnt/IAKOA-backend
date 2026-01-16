@@ -60,6 +60,22 @@ export class UsersController {
   }
 
   /**
+   * GET /users/me - Récupérer l'utilisateur connecté
+   */
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Récupérer le profil de l\'utilisateur connecté',
+    description: 'Retourne les informations de l\'utilisateur authentifié via le JWT.',
+  })
+  @ApiResponse({ status: 200, description: 'Profil de l\'utilisateur connecté', type: UserResponseDto })
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  getMe(@GetUser() user: UserResponseDto): UserResponseDto {
+    return user;
+  }
+
+  /**
    * GET /users - Récupérer tous les utilisateurs
    */
   @Get()
